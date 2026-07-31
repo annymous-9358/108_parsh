@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ivory: #fbf6ea;
+  --color-sandstone: #f0e5cd;
+  --color-sandstone-deep: #e2d2ac;
+  --color-ink: #2a1f1a;
+  --color-ink-soft: #6b5a4d;
+  --color-maroon: #7a1a2b;
+  --color-maroon-deep: #4f0f1c;
+  --color-maroon-soft: #a8394a;
+  --color-gold: #b8863f;
+  --color-gold-bright: #d9ab5c;
+  --color-saffron: #d9662b;
+
+  --background: var(--color-ivory);
+  --foreground: var(--color-ink);
 }
 
 @theme inline {
+  --color-ivory: var(--color-ivory);
+  --color-sandstone: var(--color-sandstone);
+  --color-sandstone-deep: var(--color-sandstone-deep);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-maroon: var(--color-maroon);
+  --color-maroon-deep: var(--color-maroon-deep);
+  --color-maroon-soft: var(--color-maroon-soft);
+  --color-gold: var(--color-gold);
+  --color-gold-bright: var(--color-gold-bright);
+  --color-saffron: var(--color-saffron);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-ui: var(--font-ui);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --color-ivory: #1b1310;
+    --color-sandstone: #241a15;
+    --color-sandstone-deep: #33241c;
+    --color-ink: #f1e6d4;
+    --color-ink-soft: #c4b09a;
+    --color-maroon: #c94a5c;
+    --color-maroon-deep: #8f2436;
+    --color-maroon-soft: #e07f8b;
+    --color-gold: #d9ab5c;
+    --color-gold-bright: #efc47f;
+    --color-saffron: #e8834a;
   }
 }
 
+* {
+  border-color: var(--color-sandstone-deep);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-maroon-deep);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-maroon);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+}
+
+.font-ui {
+  font-family: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+}
+
+.text-ink-soft {
+  color: var(--color-ink-soft);
 }
