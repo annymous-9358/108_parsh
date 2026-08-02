@@ -1,30 +1,28 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Star, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { tirthaImageUrl } from "@/lib/image-url";
-import type { Tirtha, TirthaImage } from "@/lib/types";
+import type { Tirtha, TirthaImage, TirthaTranslation } from "@/lib/types";
+import { LANGUAGES, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
 
 type Props =
   | { mode: "create" }
   | { mode: "edit"; tirtha: Tirtha; images: TirthaImage[] };
 
-const FIELD_LABELS: { key: keyof Tirtha; label: string; multiline?: boolean }[] = [
+const HI_FIELD_LABELS: { key: keyof Tirtha; label: string; multiline?: boolean }[] = [
   { key: "title", label: "शीर्षक" },
   { key: "city", label: "शहर" },
   { key: "state", label: "राज्य" },
   { key: "maps_url", label: "Google Maps लिंक" },
   { key: "phone", label: "फोन" },
-  { key: "mulnayak_text", label: "मूलनायक", multiline: true },
-  { key: "tirth_text", label: "तीर्थ", multiline: true },
-  { key: "history_text", label: "ऐतिहासिकता", multiline: true },
-  { key: "other_temples_text", label: "अन्य मंदिर", multiline: true },
-  { key: "directions_text", label: "दिशा निर्देश", multiline: true },
-  { key: "shastra_text", label: "शास्त्र", multiline: true },
   { key: "raw_text", label: "पूर्ण विवरण (मूल पाठ)", multiline: true },
 ];
+
+type TranslationFields = { title: string; city: string; state: string; raw_text: string };
+const EMPTY_TRANSLATION: TranslationFields = { title: "", city: "", state: "", raw_text: "" };
 
 export function TirthaForm(props: Props) {
   const router = useRouter();
@@ -44,13 +42,70 @@ export function TirthaForm(props: Props) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [activeLang, setActiveLang] = useState<LanguageCode>(DEFAULT_LANGUAGE);
+  const [translation, setTranslation] = useState<TranslationFields>(EMPTY_TRANSLATION);
+  const [translationExists, setTranslationExists] = useState(false);
+  const [loadingTranslation, setLoadingTranslation] = useState(false);
+
+  useEffect(() => {
+    if (props.mode !== "edit" || activeLang === DEFAULT_LANGUAGE) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag for the fetch this effect kicks off
+    setLoadingTranslation(true);
+    supabase
+      .from("tirtha_translations")
+      .select("*")
+      .eq("tirtha_id", props.tirtha.id)
+      .eq("lang_code", activeLang)
+      .maybeSingle()
+      .then(({ data }) => {
+        const t = data as TirthaTranslation | null;
+        setTranslation({
+          title: t?.title ?? "",
+          city: t?.city ?? "",
+          state: t?.state ?? "",
+          raw_text: t?.raw_text ?? "",
+        });
+        setTranslationExists(!!t);
+        setLoadingTranslation(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeLang]);
+
   function set<K extends keyof Tirtha>(key: K, value: Tirtha[K]) {
     setForm((f) => ({ ...f, [key]: value }));
+  }
+
+  function setTranslationField<K extends keyof TranslationFields>(key: K, value: string) {
+    setTranslation((t) => ({ ...t, [key]: value }));
   }
 
   async function handleSave() {
     setSaving(true);
     setError(null);
+
+    if (activeLang !== DEFAULT_LANGUAGE) {
+      if (props.mode !== "edit") {
+        setSaving(false);
+        return;
+      }
+      const { error } = await supabase.from("tirtha_translations").upsert(
+        {
+          tirtha_id: props.tirtha.id,
+          lang_code: activeLang,
+          title: translation.title || null,
+          city: translation.city || null,
+          state: translation.state || null,
+          raw_text: translation.raw_text || null,
+        },
+        { onConflict: "tirtha_id,lang_code" },
+      );
+      setSaving(false);
+      if (error) return setError(error.message);
+      setTranslationExists(true);
+      router.refresh();
+      return;
+    }
+
     const payload = { ...form };
     delete (payload as { id?: string }).id;
 
@@ -140,6 +195,24 @@ export function TirthaForm(props: Props) {
         </label>
       </div>
 
+      {props.mode === "edit" && (
+        <div className="mb-6 flex flex-wrap gap-1.5 border-b border-sandstone-deep/60 pb-4">
+          {LANGUAGES.map((l) => (
+            <button
+              key={l.code}
+              onClick={() => setActiveLang(l.code)}
+              className={`rounded-full px-3 py-1 font-ui text-xs transition-colors ${
+                activeLang === l.code
+                  ? "bg-maroon text-ivory"
+                  : "bg-sandstone text-ink-soft hover:text-maroon"
+              }`}
+            >
+              {l.native}
+            </button>
+          ))}
+        </div>
+      )}
+
       {error && (
         <p className="mb-4 rounded-sm border border-maroon bg-maroon/10 p-3 font-ui text-xs text-maroon">
           {error}
@@ -216,30 +289,77 @@ export function TirthaForm(props: Props) {
         </div>
       )}
 
-      <div className="flex flex-col gap-4">
-        {FIELD_LABELS.map(({ key, label, multiline }) => (
-          <div key={key}>
-            <label className="mb-1 block font-ui text-xs text-ink-soft">{label}</label>
-            {multiline ? (
-              <textarea
-                rows={key === "raw_text" ? 10 : 4}
-                value={(form[key] as string) ?? ""}
-                onChange={(e) => set(key, e.target.value as never)}
-                className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-body text-sm leading-relaxed outline-none focus:border-maroon"
-              />
-            ) : (
+      {activeLang === DEFAULT_LANGUAGE ? (
+        <div className="flex flex-col gap-4">
+          {HI_FIELD_LABELS.map(({ key, label, multiline }) => (
+            <div key={key}>
+              <label className="mb-1 block font-ui text-xs text-ink-soft">{label}</label>
+              {multiline ? (
+                <textarea
+                  rows={10}
+                  value={(form[key] as string) ?? ""}
+                  onChange={(e) => set(key, e.target.value as never)}
+                  className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-body text-sm leading-relaxed outline-none focus:border-maroon"
+                />
+              ) : (
+                <input
+                  value={(form[key] as string) ?? ""}
+                  onChange={(e) => set(key, e.target.value as never)}
+                  className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      ) : loadingTranslation ? (
+        <p className="font-ui text-sm text-ink-soft">लोड हो रहा है…</p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {!translationExists && (
+            <p className="rounded-sm border border-gold/60 bg-sandstone px-4 py-2.5 font-ui text-xs text-ink-soft">
+              इस भाषा में अभी अनुवाद नहीं है — नीचे भरकर सहेजें।
+            </p>
+          )}
+          <div>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">शीर्षक</label>
+            <input
+              value={translation.title}
+              onChange={(e) => setTranslationField("title", e.target.value)}
+              className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="mb-1 block font-ui text-xs text-ink-soft">शहर</label>
               <input
-                value={(form[key] as string) ?? ""}
-                onChange={(e) => set(key, e.target.value as never)}
+                value={translation.city}
+                onChange={(e) => setTranslationField("city", e.target.value)}
                 className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
               />
-            )}
+            </div>
+            <div>
+              <label className="mb-1 block font-ui text-xs text-ink-soft">राज्य</label>
+              <input
+                value={translation.state}
+                onChange={(e) => setTranslationField("state", e.target.value)}
+                className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
+              />
+            </div>
           </div>
-        ))}
-      </div>
+          <div>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">पूर्ण विवरण</label>
+            <textarea
+              rows={10}
+              value={translation.raw_text}
+              onChange={(e) => setTranslationField("raw_text", e.target.value)}
+              className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-body text-sm leading-relaxed outline-none focus:border-maroon"
+            />
+          </div>
+        </div>
+      )}
 
       <div className="mt-8 flex items-center justify-between border-t border-sandstone-deep/60 pt-6">
-        {props.mode === "edit" ? (
+        {props.mode === "edit" && activeLang === DEFAULT_LANGUAGE ? (
           <button
             onClick={handleDelete}
             className="font-ui text-xs text-ink-soft hover:text-maroon"

@@ -1,14 +1,15 @@
 {
+  "/[lang]/about/page": "/[lang]/about",
+  "/[lang]/page": "/[lang]",
+  "/[lang]/tirtha/[slug]/page": "/[lang]/tirtha/[slug]",
+  "/[lang]/tirthas/page": "/[lang]/tirthas",
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
-  "/about/page": "/about",
   "/admin/login/page": "/admin/login",
   "/admin/page": "/admin",
   "/admin/tirtha/[id]/page": "/admin/tirtha/[id]",
   "/admin/tirtha/new/page": "/admin/tirtha/new",
   "/favicon.ico/route": "/favicon.ico",
   "/icon.svg/route": "/icon.svg",
-  "/page": "/",
-  "/tirtha/[slug]/page": "/tirtha/[slug]",
-  "/tirthas/page": "/tirthas"
+  "/page": "/"
 }

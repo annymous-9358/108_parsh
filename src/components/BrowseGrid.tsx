@@ -2,32 +2,37 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import type { Tirtha } from "@/lib/types";
+import type { TirthaSummary } from "@/lib/types";
+import type { LanguageCode } from "@/lib/i18n/languages";
+import { getUiStrings } from "@/lib/i18n/dictionary";
 import { TirthaCard } from "@/components/TirthaCard";
 
-export function BrowseGrid({ tirthas }: { tirthas: Tirtha[] }) {
+export function BrowseGrid({ tirthas, lang }: { tirthas: TirthaSummary[]; lang: LanguageCode }) {
+  const t = getUiStrings(lang);
   const [query, setQuery] = useState("");
-  const [state, setState] = useState<string>("सभी");
+  const [state, setState] = useState<string>(t.allStates);
 
   const states = useMemo(() => {
     const s = new Set<string>();
-    tirthas.forEach((t) => t.state && s.add(t.state));
-    return ["सभी", ...Array.from(s).sort()];
-  }, [tirthas]);
+    tirthas.forEach((x) => x.state && s.add(x.state));
+    return [t.allStates, ...Array.from(s).sort()];
+  }, [tirthas, t.allStates]);
+
+  const normalize = (s: string) => s.normalize("NFC").toLowerCase();
 
   const filtered = useMemo(() => {
-    const q = query.trim();
-    return tirthas.filter((t) => {
-      if (state !== "सभी" && t.state !== state) return false;
+    const q = normalize(query.trim());
+    return tirthas.filter((x) => {
+      if (state !== t.allStates && x.state !== state) return false;
       if (!q) return true;
       return (
-        t.title.includes(q) ||
-        (t.city ?? "").includes(q) ||
-        (t.state ?? "").includes(q) ||
-        String(t.entry_number).includes(q)
+        normalize(x.title).includes(q) ||
+        normalize(x.city ?? "").includes(q) ||
+        normalize(x.state ?? "").includes(q) ||
+        String(x.entry_number).includes(q)
       );
     });
-  }, [tirthas, query, state]);
+  }, [tirthas, query, state, t.allStates]);
 
   return (
     <div>
@@ -41,7 +46,7 @@ export function BrowseGrid({ tirthas }: { tirthas: Tirtha[] }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="नाम, शहर या क्रमांक से खोजें…"
+            placeholder={t.searchPlaceholder}
             className="w-full rounded-sm border border-sandstone-deep bg-ivory py-2.5 pl-10 pr-3 font-body text-sm text-ink placeholder:text-ink-soft focus:border-maroon outline-none"
           />
         </div>
@@ -58,18 +63,14 @@ export function BrowseGrid({ tirthas }: { tirthas: Tirtha[] }) {
         </select>
       </div>
 
-      <p className="mb-4 font-ui text-xs text-ink-soft">
-        {filtered.length} तीर्थ मिले
-      </p>
+      <p className="mb-4 font-ui text-xs text-ink-soft">{t.resultsFound(filtered.length)}</p>
 
       {filtered.length === 0 ? (
-        <p className="py-16 text-center font-body text-ink-soft">
-          कोई तीर्थ नहीं मिला। कृपया अलग शब्द से खोजें।
-        </p>
+        <p className="py-16 text-center font-body text-ink-soft">{t.noResults}</p>
       ) : (
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {filtered.map((t) => (
-            <TirthaCard key={t.id} tirtha={t} />
+          {filtered.map((x) => (
+            <TirthaCard key={x.id} tirtha={x} lang={lang} />
           ))}
         </div>
       )}

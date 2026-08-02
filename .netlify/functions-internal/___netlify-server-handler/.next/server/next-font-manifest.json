@@ -1,6 +1,6 @@
 {
   "app": {
-    "[project]/src/app/_not-found/page": [
+    "[project]/src/app/[lang]/about/page": [
       "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
       "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
       "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
@@ -15,7 +15,52 @@
       "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
       "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
     ],
-    "[project]/src/app/about/page": [
+    "[project]/src/app/[lang]/page": [
+      "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
+      "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
+      "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
+      "static/media/211e29c1c16163dc-s.p.2p9qfnu2qh4q6.woff2",
+      "static/media/664dfdf7f50671c9-s.p.0h9kjuqj3fmop.woff2",
+      "static/media/615b8c4b816233f9-s.p.3hfkl415jjze8.woff2",
+      "static/media/b95053aa4d33fc1f-s.p.3gcgz_mtvoehf.woff2",
+      "static/media/0e63149d5897f52c-s.p.19jsrx7exjbdt.woff2",
+      "static/media/4ecb3f5dfe34ba3a-s.p.1d0gcmnl_dzdu.woff2",
+      "static/media/91ac69127e8041e8-s.p.083560ve--_qs.woff2",
+      "static/media/69b20fb17ced72ac-s.p.3qm25gvw3lgup.woff2",
+      "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
+      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
+    ],
+    "[project]/src/app/[lang]/tirtha/[slug]/page": [
+      "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
+      "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
+      "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
+      "static/media/211e29c1c16163dc-s.p.2p9qfnu2qh4q6.woff2",
+      "static/media/664dfdf7f50671c9-s.p.0h9kjuqj3fmop.woff2",
+      "static/media/615b8c4b816233f9-s.p.3hfkl415jjze8.woff2",
+      "static/media/b95053aa4d33fc1f-s.p.3gcgz_mtvoehf.woff2",
+      "static/media/0e63149d5897f52c-s.p.19jsrx7exjbdt.woff2",
+      "static/media/4ecb3f5dfe34ba3a-s.p.1d0gcmnl_dzdu.woff2",
+      "static/media/91ac69127e8041e8-s.p.083560ve--_qs.woff2",
+      "static/media/69b20fb17ced72ac-s.p.3qm25gvw3lgup.woff2",
+      "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
+      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
+    ],
+    "[project]/src/app/[lang]/tirthas/page": [
+      "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
+      "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
+      "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
+      "static/media/211e29c1c16163dc-s.p.2p9qfnu2qh4q6.woff2",
+      "static/media/664dfdf7f50671c9-s.p.0h9kjuqj3fmop.woff2",
+      "static/media/615b8c4b816233f9-s.p.3hfkl415jjze8.woff2",
+      "static/media/b95053aa4d33fc1f-s.p.3gcgz_mtvoehf.woff2",
+      "static/media/0e63149d5897f52c-s.p.19jsrx7exjbdt.woff2",
+      "static/media/4ecb3f5dfe34ba3a-s.p.1d0gcmnl_dzdu.woff2",
+      "static/media/91ac69127e8041e8-s.p.083560ve--_qs.woff2",
+      "static/media/69b20fb17ced72ac-s.p.3qm25gvw3lgup.woff2",
+      "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
+      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
+    ],
+    "[project]/src/app/_not-found/page": [
       "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
       "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
       "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
@@ -91,36 +136,6 @@
       "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
     ],
     "[project]/src/app/page": [
-      "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
-      "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
-      "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
-      "static/media/211e29c1c16163dc-s.p.2p9qfnu2qh4q6.woff2",
-      "static/media/664dfdf7f50671c9-s.p.0h9kjuqj3fmop.woff2",
-      "static/media/615b8c4b816233f9-s.p.3hfkl415jjze8.woff2",
-      "static/media/b95053aa4d33fc1f-s.p.3gcgz_mtvoehf.woff2",
-      "static/media/0e63149d5897f52c-s.p.19jsrx7exjbdt.woff2",
-      "static/media/4ecb3f5dfe34ba3a-s.p.1d0gcmnl_dzdu.woff2",
-      "static/media/91ac69127e8041e8-s.p.083560ve--_qs.woff2",
-      "static/media/69b20fb17ced72ac-s.p.3qm25gvw3lgup.woff2",
-      "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
-      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
-    ],
-    "[project]/src/app/tirtha/[slug]/page": [
-      "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
-      "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
-      "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",
-      "static/media/211e29c1c16163dc-s.p.2p9qfnu2qh4q6.woff2",
-      "static/media/664dfdf7f50671c9-s.p.0h9kjuqj3fmop.woff2",
-      "static/media/615b8c4b816233f9-s.p.3hfkl415jjze8.woff2",
-      "static/media/b95053aa4d33fc1f-s.p.3gcgz_mtvoehf.woff2",
-      "static/media/0e63149d5897f52c-s.p.19jsrx7exjbdt.woff2",
-      "static/media/4ecb3f5dfe34ba3a-s.p.1d0gcmnl_dzdu.woff2",
-      "static/media/91ac69127e8041e8-s.p.083560ve--_qs.woff2",
-      "static/media/69b20fb17ced72ac-s.p.3qm25gvw3lgup.woff2",
-      "static/media/5246515474daf346-s.p.14m725e1f886h.woff2",
-      "static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2"
-    ],
-    "[project]/src/app/tirthas/page": [
       "static/media/46bc28de2e2b0d9f-s.p.2m4b-9p0tazhi.woff2",
       "static/media/1773d0375f79890f-s.p.1l3o7kdaw7sd5.woff2",
       "static/media/b0d3db5ad10a75a6-s.p.2c9agv86na00f.woff2",

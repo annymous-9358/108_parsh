@@ -1,14 +1,15 @@
 {
+  "/[lang]/about/page": "app/[lang]/about/page.js",
+  "/[lang]/page": "app/[lang]/page.js",
+  "/[lang]/tirtha/[slug]/page": "app/[lang]/tirtha/[slug]/page.js",
+  "/[lang]/tirthas/page": "app/[lang]/tirthas/page.js",
   "/_global-error/page": "app/_global-error/page.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/about/page": "app/about/page.js",
   "/admin/login/page": "app/admin/login/page.js",
   "/admin/page": "app/admin/page.js",
   "/admin/tirtha/[id]/page": "app/admin/tirtha/[id]/page.js",
   "/admin/tirtha/new/page": "app/admin/tirtha/new/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
   "/icon.svg/route": "app/icon.svg/route.js",
-  "/page": "app/page.js",
-  "/tirtha/[slug]/page": "app/tirtha/[slug]/page.js",
-  "/tirthas/page": "app/tirthas/page.js"
+  "/page": "app/page.js"
 }

@@ -5,16 +5,30 @@ import { MalaRing } from "@/components/MalaRing";
 import { TirthaCard } from "@/components/TirthaCard";
 import { ContinueReading } from "@/components/ContinueReading";
 import { getAllTirthas } from "@/lib/data";
+import { isLanguageCode, type LanguageCode } from "@/lib/i18n/languages";
+import { getUiStrings } from "@/lib/i18n/dictionary";
+import { notFound } from "next/navigation";
+import { toTirthaSummary } from "@/lib/types";
 
 export const revalidate = 60;
 
-export default async function HomePage() {
-  const tirthas = await getAllTirthas();
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ lang: string }>;
+}) {
+  const { lang: langParam } = await params;
+  if (!isLanguageCode(langParam)) notFound();
+  const lang: LanguageCode = langParam;
+  const t = getUiStrings(lang);
+
+  const tirthas = (await getAllTirthas(lang)).map(toTirthaSummary);
   const featured = tirthas.slice(0, 8);
 
   return (
     <>
-      <Header />
+      <Header lang={lang} />
       <main className="flex-1">
         <section className="relative overflow-hidden">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-5 pb-16 pt-14 text-center lg:pb-24 lg:pt-20">
@@ -32,50 +46,49 @@ export default async function HomePage() {
                   १०८ पार्श्वनाथ
                 </h1>
                 <p className="font-ui text-xs uppercase tracking-[0.25em] text-ink-soft">
-                  Tirtha Darshan
+                  {t.siteSubtitle}
                 </p>
               </div>
             </div>
 
             <p className="max-w-xl text-balance font-body text-lg leading-relaxed text-ink-soft">
-              प्रत्येक मनका एक तीर्थ है — भगवान श्री पार्श्वनाथ के {tirthas.length || 108} तीर्थों का
-              इतिहास, दर्शन-फोटो और मार्गदर्शन, एक ही स्थान पर।
+              {t.heroTagline(tirthas.length || 108)}
             </p>
 
             <div className="flex w-full flex-wrap items-center justify-center gap-3">
               <Link
-                href="/tirthas"
+                href={`/${lang}/tirthas`}
                 className="rounded-sm bg-maroon px-6 py-3 font-ui text-sm font-medium text-ivory hover:bg-maroon-deep transition-colors"
               >
-                सभी तीर्थ देखें
+                {t.ctaBrowse}
               </Link>
               <Link
-                href="/about"
+                href={`/${lang}/about`}
                 className="rounded-sm border border-sandstone-deep px-6 py-3 font-ui text-sm font-medium text-ink hover:border-maroon hover:text-maroon transition-colors"
               >
-                प्रभु का इतिहास पढ़ें
+                {t.ctaAbout}
               </Link>
             </div>
           </div>
         </section>
 
-        <ContinueReading />
+        <ContinueReading lang={lang} />
 
         <section className="mx-auto max-w-6xl px-5 pb-24">
           <div className="mb-6 flex items-baseline justify-between">
-            <h2 className="font-display text-2xl text-ink">कुछ प्रमुख तीर्थ</h2>
-            <Link href="/tirthas" className="font-ui text-xs text-maroon hover:underline">
-              पूरी सूची →
+            <h2 className="font-display text-2xl text-ink">{t.featuredHeading}</h2>
+            <Link href={`/${lang}/tirthas`} className="font-ui text-xs text-maroon hover:underline">
+              {t.viewAll}
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {featured.map((t) => (
-              <TirthaCard key={t.id} tirtha={t} />
+            {featured.map((x) => (
+              <TirthaCard key={x.id} tirtha={x} lang={lang} />
             ))}
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </>
   );
 }

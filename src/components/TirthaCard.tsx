@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Tirtha } from "@/lib/types";
+import type { TirthaSummary } from "@/lib/types";
+import type { LanguageCode } from "@/lib/i18n/languages";
 import { tirthaImageUrl } from "@/lib/image-url";
 
-export function TirthaCard({ tirtha }: { tirtha: Tirtha }) {
+export function TirthaCard({ tirtha, lang }: { tirtha: TirthaSummary; lang: LanguageCode }) {
   return (
     <Link
-      href={`/tirtha/${tirtha.slug}`}
+      href={`/${lang}/tirtha/${tirtha.slug}`}
       className="group flex flex-col overflow-hidden rounded-sm bg-sandstone border border-sandstone-deep/70 hover:border-gold transition-colors"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-sandstone-deep/40">

@@ -6,39 +6,53 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MalaRing } from "@/components/MalaRing";
 import { HistoryRecorder } from "@/components/HistoryRecorder";
+import { SpeakButton } from "@/components/SpeakButton";
 import { getAllTirthas, getTirtha, getTirthaImages } from "@/lib/data";
 import { tirthaImageUrl } from "@/lib/image-url";
+import { isLanguageCode, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
+import { getUiStrings } from "@/lib/i18n/dictionary";
 
 export const revalidate = 60;
 
+// Fully pre-build the most-used languages at build time; every other
+// language still works — it just renders (and caches) on first request.
+const PRERENDER_LANGS = ["hi", "en", "gu"];
+
 export async function generateStaticParams() {
   const tirthas = await getAllTirthas();
-  return tirthas.map((t) => ({ slug: t.slug }));
+  return PRERENDER_LANGS.flatMap((lang) =>
+    tirthas.map((t) => ({ lang, slug: t.slug })),
+  );
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const tirtha = await getTirtha(slug);
+  const { lang: langParam, slug } = await params;
+  const lang = isLanguageCode(langParam) ? langParam : DEFAULT_LANGUAGE;
+  const tirtha = await getTirtha(slug, lang);
   return { title: tirtha ? `${tirtha.title} — 108 Parshwanath` : "108 Parshwanath" };
 }
 
 export default async function TirthaDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const [tirtha, all] = await Promise.all([getTirtha(slug), getAllTirthas()]);
+  const { lang: langParam, slug } = await params;
+  if (!isLanguageCode(langParam)) notFound();
+  const lang: LanguageCode = langParam;
+  const t = getUiStrings(lang);
+
+  const [tirtha, all] = await Promise.all([getTirtha(slug, lang), getAllTirthas(lang)]);
 
   if (!tirtha) notFound();
 
   const images = await getTirthaImages(tirtha.id);
 
-  const idx = all.findIndex((t) => t.slug === slug);
+  const idx = all.findIndex((x) => x.slug === slug);
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
 
@@ -49,14 +63,14 @@ export default async function TirthaDetailPage({
 
   return (
     <>
-      <Header />
+      <Header lang={lang} />
       <HistoryRecorder tirthaId={tirtha.id} />
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-5 py-10">
           <div className="mb-3 flex items-start justify-between gap-6">
             <div>
               <p className="mb-2 font-ui text-xs uppercase tracking-[0.2em] text-gold">
-                तीर्थ क्रमांक {tirtha.entry_number} / {all.length}
+                {t.entryLabel(tirtha.entry_number, all.length)}
               </p>
               <h1 className="font-display text-4xl leading-tight text-maroon">
                 {tirtha.title}
@@ -66,7 +80,8 @@ export default async function TirthaDetailPage({
               total={all.length}
               current={tirtha.entry_number}
               size={84}
-              slugs={all.map((t) => t.slug)}
+              slugs={all.map((x) => x.slug)}
+              lang={lang}
               className="hidden shrink-0 sm:block"
             />
           </div>
@@ -77,7 +92,7 @@ export default async function TirthaDetailPage({
             </p>
           )}
 
-          <div className="mb-8 flex flex-wrap gap-3">
+          <div className="mb-8 flex flex-wrap items-center gap-3">
             {tirtha.maps_url && (
               <a
                 href={tirtha.maps_url}
@@ -86,7 +101,7 @@ export default async function TirthaDetailPage({
                 className="inline-flex items-center gap-2 rounded-sm bg-maroon px-5 py-2.5 font-ui text-sm font-medium text-ivory hover:bg-maroon-deep transition-colors"
               >
                 <MapPin className="h-4 w-4" aria-hidden />
-                Google Maps पर देखें
+                {t.openMaps}
               </a>
             )}
             {tirtha.phone && (
@@ -98,7 +113,19 @@ export default async function TirthaDetailPage({
                 {tirtha.phone}
               </a>
             )}
+            <SpeakButton
+              text={[tirtha.title, ...paragraphs].join(". ")}
+              lang={lang}
+              label={t.listen}
+              stopLabel={t.stopListening}
+            />
           </div>
+
+          {lang !== DEFAULT_LANGUAGE && !tirtha.is_translated && (
+            <p className="mb-8 rounded-sm border border-gold/60 bg-sandstone px-4 py-2.5 font-ui text-xs text-ink-soft">
+              {t.translationNotice}
+            </p>
+          )}
 
           {images.length > 0 && (
             <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -130,7 +157,7 @@ export default async function TirthaDetailPage({
           <nav className="mt-14 flex items-center justify-between border-t border-sandstone-deep/60 pt-6">
             {prev ? (
               <Link
-                href={`/tirtha/${prev.slug}`}
+                href={`/${lang}/tirtha/${prev.slug}`}
                 className="group flex items-center gap-1.5 font-ui text-sm text-ink-soft hover:text-maroon transition-colors"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden />
@@ -141,7 +168,7 @@ export default async function TirthaDetailPage({
             )}
             {next ? (
               <Link
-                href={`/tirtha/${next.slug}`}
+                href={`/${lang}/tirtha/${next.slug}`}
                 className="group flex items-center gap-1.5 text-right font-ui text-sm text-ink-soft hover:text-maroon transition-colors"
               >
                 <span className="max-w-[10rem] truncate sm:max-w-xs">{next.title}</span>
@@ -153,7 +180,7 @@ export default async function TirthaDetailPage({
           </nav>
         </div>
       </main>
-      <Footer />
+      <Footer lang={lang} />
     </>
   );
 }

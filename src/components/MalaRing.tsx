@@ -6,8 +6,9 @@ type MalaRingProps = {
   total: number;
   current?: number;
   size?: number;
-  /** Slugs in entry order (1-indexed by position) — when given, beads link to `/tirtha/{slug}`. */
+  /** Slugs in entry order (1-indexed by position) — when given (with lang), beads link to a tirtha. */
   slugs?: string[];
+  lang?: string;
   className?: string;
 };
 
@@ -21,6 +22,7 @@ export function MalaRing({
   current,
   size = 440,
   slugs,
+  lang = "hi",
   className = "",
 }: MalaRingProps) {
   const r = size / 2;
@@ -65,7 +67,7 @@ export function MalaRing({
           return (
             <Link
               key={n}
-              href={`/tirtha/${slug}`}
+              href={`/${lang}/tirtha/${slug}`}
               prefetch={false}
               aria-label={`तीर्थ क्रमांक ${n}`}
               className="focus-visible:outline-none"

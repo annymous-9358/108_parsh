@@ -6,10 +6,13 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { tirthaImageUrl } from "@/lib/image-url";
 import type { Tirtha } from "@/lib/types";
+import type { LanguageCode } from "@/lib/i18n/languages";
+import { getUiStrings } from "@/lib/i18n/dictionary";
 
 type HistoryRow = { last_viewed_at: string; tirthas: Tirtha };
 
-export function ContinueReading() {
+export function ContinueReading({ lang }: { lang: LanguageCode }) {
+  const t = getUiStrings(lang);
   const [rows, setRows] = useState<HistoryRow[] | null>(null);
 
   useEffect(() => {
@@ -38,14 +41,14 @@ export function ContinueReading() {
 
   return (
     <section className="mx-auto max-w-6xl px-5 pb-4">
-      <h2 className="mb-4 font-display text-xl text-ink">जहाँ आपने छोड़ा था</h2>
+      <h2 className="mb-4 font-display text-xl text-ink">{t.continueReading}</h2>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {rows.map(
           (row) =>
             row.tirthas && (
               <Link
                 key={row.tirthas.id}
-                href={`/tirtha/${row.tirthas.slug}`}
+                href={`/${lang}/tirtha/${row.tirthas.slug}`}
                 className="group flex w-40 shrink-0 flex-col gap-2"
               >
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-sandstone-deep/30">

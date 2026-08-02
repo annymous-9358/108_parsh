@@ -31,12 +31,37 @@
       "namedRegex": "^/admin/tirtha/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
-      "page": "/tirtha/[slug]",
-      "regex": "^/tirtha/([^/]+?)(?:/)?$",
+      "page": "/[lang]",
+      "regex": "^/([^/]+?)(?:/)?$",
       "routeKeys": {
+        "nxtPlang": "nxtPlang"
+      },
+      "namedRegex": "^/(?<nxtPlang>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[lang]/about",
+      "regex": "^/([^/]+?)/about(?:/)?$",
+      "routeKeys": {
+        "nxtPlang": "nxtPlang"
+      },
+      "namedRegex": "^/(?<nxtPlang>[^/]+?)/about(?:/)?$"
+    },
+    {
+      "page": "/[lang]/tirtha/[slug]",
+      "regex": "^/([^/]+?)/tirtha/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPlang": "nxtPlang",
         "nxtPslug": "nxtPslug"
       },
-      "namedRegex": "^/tirtha/(?<nxtPslug>[^/]+?)(?:/)?$"
+      "namedRegex": "^/(?<nxtPlang>[^/]+?)/tirtha/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/[lang]/tirthas",
+      "regex": "^/([^/]+?)/tirthas(?:/)?$",
+      "routeKeys": {
+        "nxtPlang": "nxtPlang"
+      },
+      "namedRegex": "^/(?<nxtPlang>[^/]+?)/tirthas(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -57,12 +82,6 @@
       "regex": "^/_not\\-found(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/_not\\-found(?:/)?$"
-    },
-    {
-      "page": "/about",
-      "regex": "^/about(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/about(?:/)?$"
     },
     {
       "page": "/admin",
@@ -93,12 +112,6 @@
       "regex": "^/icon\\.svg(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/icon\\.svg(?:/)?$"
-    },
-    {
-      "page": "/tirthas",
-      "regex": "^/tirthas(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/tirthas(?:/)?$"
     }
   ],
   "dataRoutes": [],
