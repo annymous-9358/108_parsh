@@ -23,6 +23,9 @@ export function Header({ lang }: { lang: LanguageCode }) {
           <Link href={`/${lang}/about`} className="hover:text-maroon transition-colors">
             {t.navHistory}
           </Link>
+          <Link href={`/${lang}/map`} className="hover:text-maroon transition-colors">
+            {t.navMap}
+          </Link>
           <Link
             href="/admin"
             className="text-ink-soft hover:text-maroon transition-colors text-[11px] uppercase tracking-wide"

@@ -17,12 +17,17 @@ export async function generateMetadata({
   return { title: `${t.aboutTitle} — 108 Parshwanath` };
 }
 
-function getAboutText() {
-  const p = path.join(process.cwd(), "src/content/about_parshwanath.txt");
+function getAboutText(lang: LanguageCode) {
+  const translatedPath = path.join(process.cwd(), `src/content/about/${lang}.txt`);
+  const fallbackPath = path.join(process.cwd(), "src/content/about_parshwanath.txt");
   try {
-    return fs.readFileSync(p, "utf-8");
+    return fs.readFileSync(translatedPath, "utf-8");
   } catch {
-    return "";
+    try {
+      return fs.readFileSync(fallbackPath, "utf-8");
+    } catch {
+      return "";
+    }
   }
 }
 
@@ -36,7 +41,7 @@ export default async function AboutPage({
   const lang: LanguageCode = langParam;
   const t = getUiStrings(lang);
 
-  const text = getAboutText();
+  const text = getAboutText(lang);
   const paragraphs = text
     .split("\n")
     .map((p) => p.trim())
@@ -51,7 +56,13 @@ export default async function AboutPage({
             <p className="font-ui text-xs uppercase tracking-[0.2em] text-gold">
               {t.aboutEyebrow}
             </p>
-            <SpeakButton text={paragraphs.join(" ")} lang={lang} label={t.listen} stopLabel={t.stopListening} />
+            <SpeakButton
+              text={paragraphs.join(" ")}
+              lang={lang}
+              label={t.listen}
+              stopLabel={t.stopListening}
+              unavailableLabel={t.audioUnavailable}
+            />
           </div>
           <h1 className="mb-4 font-display text-4xl text-maroon">{t.aboutTitle}</h1>
           {lang !== DEFAULT_LANGUAGE && (

@@ -2,24 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Star, Loader2 } from "lucide-react";
+import { Trash2, Star, Loader2, MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { tirthaImageUrl } from "@/lib/image-url";
 import type { Tirtha, TirthaImage, TirthaTranslation } from "@/lib/types";
 import { LANGUAGES, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
+import { getUiStrings } from "@/lib/i18n/dictionary";
 
-type Props =
+type Props = (
   | { mode: "create" }
-  | { mode: "edit"; tirtha: Tirtha; images: TirthaImage[] };
-
-const HI_FIELD_LABELS: { key: keyof Tirtha; label: string; multiline?: boolean }[] = [
-  { key: "title", label: "शीर्षक" },
-  { key: "city", label: "शहर" },
-  { key: "state", label: "राज्य" },
-  { key: "maps_url", label: "Google Maps लिंक" },
-  { key: "phone", label: "फोन" },
-  { key: "raw_text", label: "पूर्ण विवरण (मूल पाठ)", multiline: true },
-];
+  | { mode: "edit"; tirtha: Tirtha; images: TirthaImage[] }
+) & { adminLang: LanguageCode };
 
 type TranslationFields = { title: string; city: string; state: string; raw_text: string };
 const EMPTY_TRANSLATION: TranslationFields = { title: "", city: "", state: "", raw_text: "" };
@@ -28,6 +21,16 @@ export function TirthaForm(props: Props) {
   const router = useRouter();
   const supabase = createClient();
   const fileInput = useRef<HTMLInputElement>(null);
+  const t = getUiStrings(props.adminLang).admin;
+
+  const FIELD_LABELS: { key: keyof Tirtha; label: string; multiline?: boolean }[] = [
+    { key: "title", label: t.fieldTitle },
+    { key: "city", label: t.fieldCity },
+    { key: "state", label: t.fieldState },
+    { key: "maps_url", label: t.fieldMapsLink },
+    { key: "phone", label: t.fieldPhone },
+    { key: "raw_text", label: t.fieldFullText, multiline: true },
+  ];
 
   const initial: Partial<Tirtha> =
     props.mode === "edit"
@@ -41,6 +44,8 @@ export function TirthaForm(props: Props) {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeError, setGeocodeError] = useState<string | null>(null);
 
   const [activeLang, setActiveLang] = useState<LanguageCode>(DEFAULT_LANGUAGE);
   const [translation, setTranslation] = useState<TranslationFields>(EMPTY_TRANSLATION);
@@ -58,14 +63,14 @@ export function TirthaForm(props: Props) {
       .eq("lang_code", activeLang)
       .maybeSingle()
       .then(({ data }) => {
-        const t = data as TirthaTranslation | null;
+        const tr = data as TirthaTranslation | null;
         setTranslation({
-          title: t?.title ?? "",
-          city: t?.city ?? "",
-          state: t?.state ?? "",
-          raw_text: t?.raw_text ?? "",
+          title: tr?.title ?? "",
+          city: tr?.city ?? "",
+          state: tr?.state ?? "",
+          raw_text: tr?.raw_text ?? "",
         });
-        setTranslationExists(!!t);
+        setTranslationExists(!!tr);
         setLoadingTranslation(false);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,7 +81,7 @@ export function TirthaForm(props: Props) {
   }
 
   function setTranslationField<K extends keyof TranslationFields>(key: K, value: string) {
-    setTranslation((t) => ({ ...t, [key]: value }));
+    setTranslation((tr) => ({ ...tr, [key]: value }));
   }
 
   async function handleSave() {
@@ -130,9 +135,36 @@ export function TirthaForm(props: Props) {
     }
   }
 
+  async function handleGeocode() {
+    if (!form.maps_url?.trim()) {
+      setGeocodeError(t.geocodeMissingUrl);
+      return;
+    }
+    setGeocoding(true);
+    setGeocodeError(null);
+    try {
+      const res = await fetch("/api/admin/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mapsUrl: form.maps_url, city: form.city, state: form.state }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGeocodeError(data.error ?? t.geocodeError);
+        return;
+      }
+      set("latitude", data.lat);
+      set("longitude", data.lon);
+    } catch {
+      setGeocodeError(t.geocodeError);
+    } finally {
+      setGeocoding(false);
+    }
+  }
+
   async function handleDelete() {
     if (props.mode !== "edit") return;
-    if (!confirm("क्या आप वाकई इस तीर्थ को हटाना चाहते हैं?")) return;
+    if (!confirm(t.confirmDeleteTemple)) return;
     await supabase.from("tirthas").delete().eq("id", props.tirtha.id);
     router.push("/admin");
   }
@@ -183,7 +215,7 @@ export function TirthaForm(props: Props) {
     <div className="mx-auto max-w-3xl px-5 py-10">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-display text-2xl text-maroon">
-          {props.mode === "create" ? "नया तीर्थ जोड़ें" : "तीर्थ संपादित करें"}
+          {props.mode === "create" ? t.newTempleTitle : t.editTempleTitle}
         </h1>
         <label className="flex items-center gap-2 font-ui text-xs text-ink-soft">
           <input
@@ -191,7 +223,7 @@ export function TirthaForm(props: Props) {
             checked={form.published ?? true}
             onChange={(e) => set("published", e.target.checked)}
           />
-          प्रकाशित
+          {t.publishedCheckbox}
         </label>
       </div>
 
@@ -222,7 +254,7 @@ export function TirthaForm(props: Props) {
       {props.mode === "create" && (
         <div className="mb-4 grid grid-cols-2 gap-3">
           <div>
-            <label className="mb-1 block font-ui text-xs text-ink-soft">क्रमांक</label>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">{t.entryNumberLabel}</label>
             <input
               type="number"
               value={form.entry_number ?? 0}
@@ -231,7 +263,7 @@ export function TirthaForm(props: Props) {
             />
           </div>
           <div>
-            <label className="mb-1 block font-ui text-xs text-ink-soft">slug</label>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">{t.slugLabel}</label>
             <input
               value={form.slug ?? ""}
               onChange={(e) => set("slug", e.target.value)}
@@ -244,7 +276,7 @@ export function TirthaForm(props: Props) {
 
       {props.mode === "edit" && (
         <div className="mb-8">
-          <p className="mb-2 font-ui text-xs text-ink-soft">फोटो</p>
+          <p className="mb-2 font-ui text-xs text-ink-soft">{t.photosLabel}</p>
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
             {images.map((im) => (
               <div key={im.id} className="group relative aspect-square overflow-hidden rounded-sm bg-sandstone-deep/30">
@@ -257,14 +289,14 @@ export function TirthaForm(props: Props) {
                 <div className="absolute inset-0 flex items-start justify-between bg-black/0 p-1.5 opacity-0 transition-opacity group-hover:bg-black/30 group-hover:opacity-100">
                   <button
                     onClick={() => handleMakeCover(im)}
-                    title="मुख्य फोटो बनाएं"
+                    title={t.setCoverPhoto}
                     className="rounded-full bg-ivory/90 p-1.5 text-gold hover:text-maroon"
                   >
                     <Star className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => handleDeleteImage(im)}
-                    title="हटाएं"
+                    title={t.removePhoto}
                     className="rounded-full bg-ivory/90 p-1.5 text-ink-soft hover:text-maroon"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -291,7 +323,7 @@ export function TirthaForm(props: Props) {
 
       {activeLang === DEFAULT_LANGUAGE ? (
         <div className="flex flex-col gap-4">
-          {HI_FIELD_LABELS.map(({ key, label, multiline }) => (
+          {FIELD_LABELS.map(({ key, label, multiline }) => (
             <div key={key}>
               <label className="mb-1 block font-ui text-xs text-ink-soft">{label}</label>
               {multiline ? (
@@ -308,20 +340,75 @@ export function TirthaForm(props: Props) {
                   className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
                 />
               )}
+              {key === "maps_url" && (
+                <div className="mt-2 rounded-sm border border-sandstone-deep/60 bg-sandstone/40 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="font-ui text-xs text-ink-soft">{t.mapPinNote}</p>
+                    <button
+                      type="button"
+                      onClick={handleGeocode}
+                      disabled={geocoding}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-sm border border-sandstone-deep px-3 py-1.5 font-ui text-xs text-ink-soft hover:border-maroon hover:text-maroon disabled:opacity-50"
+                    >
+                      {geocoding ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <MapPin className="h-3.5 w-3.5" />
+                      )}
+                      {t.geocodeButton}
+                    </button>
+                  </div>
+                  {geocodeError && (
+                    <p className="mb-2 font-ui text-xs text-maroon">{geocodeError}</p>
+                  )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="mb-1 block font-ui text-xs text-ink-soft">{t.latitudeLabel}</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={form.latitude ?? ""}
+                        onChange={(e) => set("latitude", e.target.value === "" ? null : Number(e.target.value))}
+                        className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block font-ui text-xs text-ink-soft">{t.longitudeLabel}</label>
+                      <input
+                        type="number"
+                        step="any"
+                        value={form.longitude ?? ""}
+                        onChange={(e) => set("longitude", e.target.value === "" ? null : Number(e.target.value))}
+                        className="w-full rounded-sm border border-sandstone-deep bg-ivory px-3 py-2 font-ui text-sm outline-none focus:border-maroon"
+                      />
+                    </div>
+                  </div>
+                  {form.latitude != null && form.longitude != null && (
+                    <a
+                      href={`https://www.google.com/maps?q=${form.latitude},${form.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 inline-block font-ui text-xs text-maroon underline underline-offset-2"
+                    >
+                      {t.verifyPin}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : loadingTranslation ? (
-        <p className="font-ui text-sm text-ink-soft">लोड हो रहा है…</p>
+        <p className="font-ui text-sm text-ink-soft">{t.loading}</p>
       ) : (
         <div className="flex flex-col gap-4">
           {!translationExists && (
             <p className="rounded-sm border border-gold/60 bg-sandstone px-4 py-2.5 font-ui text-xs text-ink-soft">
-              इस भाषा में अभी अनुवाद नहीं है — नीचे भरकर सहेजें।
+              {t.translationMissingNotice}
             </p>
           )}
           <div>
-            <label className="mb-1 block font-ui text-xs text-ink-soft">शीर्षक</label>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">{t.fieldTitle}</label>
             <input
               value={translation.title}
               onChange={(e) => setTranslationField("title", e.target.value)}
@@ -330,7 +417,7 @@ export function TirthaForm(props: Props) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block font-ui text-xs text-ink-soft">शहर</label>
+              <label className="mb-1 block font-ui text-xs text-ink-soft">{t.fieldCity}</label>
               <input
                 value={translation.city}
                 onChange={(e) => setTranslationField("city", e.target.value)}
@@ -338,7 +425,7 @@ export function TirthaForm(props: Props) {
               />
             </div>
             <div>
-              <label className="mb-1 block font-ui text-xs text-ink-soft">राज्य</label>
+              <label className="mb-1 block font-ui text-xs text-ink-soft">{t.fieldState}</label>
               <input
                 value={translation.state}
                 onChange={(e) => setTranslationField("state", e.target.value)}
@@ -347,7 +434,7 @@ export function TirthaForm(props: Props) {
             </div>
           </div>
           <div>
-            <label className="mb-1 block font-ui text-xs text-ink-soft">पूर्ण विवरण</label>
+            <label className="mb-1 block font-ui text-xs text-ink-soft">{t.fieldFullText}</label>
             <textarea
               rows={10}
               value={translation.raw_text}
@@ -364,7 +451,7 @@ export function TirthaForm(props: Props) {
             onClick={handleDelete}
             className="font-ui text-xs text-ink-soft hover:text-maroon"
           >
-            यह तीर्थ हटाएं
+            {t.deleteTemple}
           </button>
         ) : (
           <span />
@@ -374,7 +461,7 @@ export function TirthaForm(props: Props) {
           disabled={saving}
           className="rounded-sm bg-maroon px-6 py-2.5 font-ui text-sm font-medium text-ivory hover:bg-maroon-deep transition-colors disabled:opacity-50"
         >
-          {saving ? "सहेजा जा रहा है…" : "सहेजें"}
+          {saving ? t.saving : t.save}
         </button>
       </div>
     </div>

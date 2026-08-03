@@ -47,6 +47,14 @@
       "namedRegex": "^/(?<nxtPlang>[^/]+?)/about(?:/)?$"
     },
     {
+      "page": "/[lang]/map",
+      "regex": "^/([^/]+?)/map(?:/)?$",
+      "routeKeys": {
+        "nxtPlang": "nxtPlang"
+      },
+      "namedRegex": "^/(?<nxtPlang>[^/]+?)/map(?:/)?$"
+    },
+    {
       "page": "/[lang]/tirtha/[slug]",
       "regex": "^/([^/]+?)/tirtha/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -100,6 +108,18 @@
       "regex": "^/admin/tirtha/new(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/tirtha/new(?:/)?$"
+    },
+    {
+      "page": "/api/admin/geocode",
+      "regex": "^/api/admin/geocode(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/geocode(?:/)?$"
+    },
+    {
+      "page": "/api/tts",
+      "regex": "^/api/tts(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/tts(?:/)?$"
     },
     {
       "page": "/favicon.ico",

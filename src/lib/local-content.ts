@@ -65,5 +65,7 @@ function toTirtha(e: RawEntry): Tirtha {
     cover_image_path: e.cover_image_filename,
     published: true,
     sort_order: e.entry_number,
+    latitude: null,
+    longitude: null,
   };
 }

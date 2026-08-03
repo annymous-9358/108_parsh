@@ -17,9 +17,17 @@ export type Tirtha = {
   cover_image_path: string | null;
   published: boolean;
   sort_order: number;
+  latitude: number | null;
+  longitude: number | null;
   /** True when raw_text/title reflect a real translation rather than the Hindi fallback. */
   is_translated?: boolean;
 };
+
+/** Lightweight projection for the all-temples map page — just enough to place a pin and link out. */
+export type TirthaMapPoint = Pick<
+  Tirtha,
+  "id" | "entry_number" | "slug" | "title" | "city" | "state" | "maps_url" | "latitude" | "longitude"
+>;
 
 /**
  * Lightweight projection used for card grids/lists (browse page, home

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/supabase/admin-guard";
 import { TirthaForm } from "@/components/admin/TirthaForm";
+import { getAdminLang } from "@/lib/i18n/admin-lang";
 import type { Tirtha, TirthaImage } from "@/lib/types";
 
 export default async function EditTirthaPage({
@@ -10,6 +11,7 @@ export default async function EditTirthaPage({
 }) {
   const { id } = await params;
   const { supabase } = await requireAdmin();
+  const adminLang = await getAdminLang();
 
   const [{ data: tirtha }, { data: images }] = await Promise.all([
     supabase.from("tirthas").select("*").eq("id", id).maybeSingle(),
@@ -27,6 +29,7 @@ export default async function EditTirthaPage({
       mode="edit"
       tirtha={tirtha as Tirtha}
       images={(images ?? []) as TirthaImage[]}
+      adminLang={adminLang}
     />
   );
 }

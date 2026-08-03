@@ -118,6 +118,7 @@ export default async function TirthaDetailPage({
               lang={lang}
               label={t.listen}
               stopLabel={t.stopListening}
+              unavailableLabel={t.audioUnavailable}
             />
           </div>
 

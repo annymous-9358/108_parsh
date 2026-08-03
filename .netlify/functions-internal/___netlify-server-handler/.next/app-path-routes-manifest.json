@@ -1,5 +1,6 @@
 {
   "/[lang]/about/page": "/[lang]/about",
+  "/[lang]/map/page": "/[lang]/map",
   "/[lang]/page": "/[lang]",
   "/[lang]/tirtha/[slug]/page": "/[lang]/tirtha/[slug]",
   "/[lang]/tirthas/page": "/[lang]/tirthas",
@@ -9,6 +10,8 @@
   "/admin/page": "/admin",
   "/admin/tirtha/[id]/page": "/admin/tirtha/[id]",
   "/admin/tirtha/new/page": "/admin/tirtha/new",
+  "/api/admin/geocode/route": "/api/admin/geocode",
+  "/api/tts/route": "/api/tts",
   "/favicon.ico/route": "/favicon.ico",
   "/icon.svg/route": "/icon.svg",
   "/page": "/"
