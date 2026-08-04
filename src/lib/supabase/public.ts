@@ -13,5 +13,9 @@ export function createPublicClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    // v2 is a separate schema in the same Supabase project — a full data
+    // copy of `public` made when this redesign shipped, so admin edits made
+    // here can never touch the original site's content.
+    { db: { schema: "v2" } },
   );
 }

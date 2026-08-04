@@ -31,6 +31,14 @@ export default async function HomePage({
       <Header lang={lang} />
       <main className="flex-1">
         <section className="relative overflow-hidden">
+          <div
+            className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/4 rounded-full opacity-60"
+            style={{
+              background:
+                "radial-gradient(circle, color-mix(in oklab, var(--color-gold) 16%, transparent) 0%, transparent 70%)",
+            }}
+            aria-hidden
+          />
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-5 pb-16 pt-14 text-center lg:pb-24 lg:pt-20">
             <div className="relative flex items-center justify-center">
               <MalaRing
@@ -58,13 +66,13 @@ export default async function HomePage({
             <div className="flex w-full flex-wrap items-center justify-center gap-3">
               <Link
                 href={`/${lang}/tirthas`}
-                className="rounded-sm bg-maroon px-6 py-3 font-ui text-sm font-medium text-ivory hover:bg-maroon-deep transition-colors"
+                className="rounded-sm bg-maroon px-6 py-3 font-ui text-sm font-medium text-ivory shadow-[0_1px_2px_rgba(0,0,0,0.1)] transition-all hover:-translate-y-0.5 hover:bg-maroon-deep hover:shadow-[0_8px_20px_-6px_rgba(122,26,43,0.45)]"
               >
                 {t.ctaBrowse}
               </Link>
               <Link
                 href={`/${lang}/about`}
-                className="rounded-sm border border-sandstone-deep px-6 py-3 font-ui text-sm font-medium text-ink hover:border-maroon hover:text-maroon transition-colors"
+                className="rounded-sm border border-sandstone-deep px-6 py-3 font-ui text-sm font-medium text-ink transition-all hover:-translate-y-0.5 hover:border-maroon hover:text-maroon"
               >
                 {t.ctaAbout}
               </Link>

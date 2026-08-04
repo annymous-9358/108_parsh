@@ -11,6 +11,10 @@ export type Tirtha = {
   other_temples_text: string | null;
   directions_text: string | null;
   shastra_text: string | null;
+  trust_text: string | null;
+  mantra_text: string | null;
+  stuti_text: string | null;
+  address_text: string | null;
   raw_text: string | null;
   maps_url: string | null;
   phone: string | null;

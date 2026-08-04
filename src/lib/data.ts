@@ -5,6 +5,28 @@ import type { Tirtha, TirthaImage, TirthaMapPoint, TirthaTranslation } from "@/l
 
 const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
 
+/**
+ * Static generation fires hundreds of these queries in a short window
+ * (every prerendered [lang]/tirtha/[slug] page independently re-fetches
+ * the full tirthas/tirtha_translations tables), which occasionally trips
+ * Supabase's statement_timeout under that concurrent load. A timeout is
+ * transient — retrying the same query with backoff succeeds — so retry
+ * a couple of times before giving up rather than failing the whole build.
+ */
+async function withRetry<T>(
+  fn: () => PromiseLike<{ data: T; error: { code?: string; message: string } | null }>,
+) {
+  let lastError: { code?: string; message: string } | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await fn();
+    if (!error) return data;
+    lastError = error;
+    if (error.code !== "57014" && !error.message?.includes("timeout")) break;
+    await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
+  }
+  throw lastError;
+}
+
 function applyTranslation(base: Tirtha, translation?: TirthaTranslation | null): Tirtha {
   if (!translation) return { ...base, is_translated: false };
   const hasContent = !!(translation.title || translation.raw_text);
@@ -14,6 +36,25 @@ function applyTranslation(base: Tirtha, translation?: TirthaTranslation | null):
     city: translation.city || base.city,
     state: translation.state || base.state,
     raw_text: translation.raw_text || base.raw_text,
+    // The structured section fields (mulnayak_text, tirth_text, ...) only
+    // exist in Hindi — tirtha_translations has no equivalent columns. Once
+    // a real translation is applied, null these out so the detail page
+    // falls back to the translated raw_text as plain paragraphs instead of
+    // silently mixing Hindi section text into a non-Hindi page.
+    ...(hasContent
+      ? {
+          mulnayak_text: null,
+          tirth_text: null,
+          history_text: null,
+          other_temples_text: null,
+          directions_text: null,
+          shastra_text: null,
+          trust_text: null,
+          mantra_text: null,
+          stuti_text: null,
+          address_text: null,
+        }
+      : {}),
     is_translated: hasContent,
   };
 }
@@ -25,21 +66,16 @@ export async function getAllTirthas(lang: LanguageCode = DEFAULT_LANGUAGE): Prom
       .sort((a, b) => a.sort_order - b.sort_order);
   }
   const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("tirthas")
-    .select("*")
-    .eq("published", true)
-    .order("sort_order", { ascending: true });
-  if (error) throw error;
-  const base = data as Tirtha[];
+  const base = (await withRetry(() =>
+    supabase.from("tirthas").select("*").eq("published", true).order("sort_order", { ascending: true }),
+  )) as Tirtha[];
 
   if (lang === DEFAULT_LANGUAGE) return base;
 
-  const { data: translations } = await supabase
-    .from("tirtha_translations")
-    .select("*")
-    .eq("lang_code", lang);
-  const byId = new Map((translations ?? []).map((t) => [t.tirtha_id, t as TirthaTranslation]));
+  const translations = (await withRetry(() =>
+    supabase.from("tirtha_translations").select("*").eq("lang_code", lang),
+  )) as TirthaTranslation[];
+  const byId = new Map((translations ?? []).map((t) => [t.tirtha_id, t]));
   return base.map((t) => applyTranslation(t, byId.get(t.id)));
 }
 
@@ -51,23 +87,15 @@ export async function getTirtha(
     return localTirtha(slug);
   }
   const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("tirthas")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
-  if (error) throw error;
+  const data = await withRetry(() => supabase.from("tirthas").select("*").eq("slug", slug).maybeSingle());
   if (!data) return undefined;
   const base = data as Tirtha;
 
   if (lang === DEFAULT_LANGUAGE) return base;
 
-  const { data: translation } = await supabase
-    .from("tirtha_translations")
-    .select("*")
-    .eq("tirtha_id", base.id)
-    .eq("lang_code", lang)
-    .maybeSingle();
+  const translation = await withRetry(() =>
+    supabase.from("tirtha_translations").select("*").eq("tirtha_id", base.id).eq("lang_code", lang).maybeSingle(),
+  );
   return applyTranslation(base, translation as TirthaTranslation | null);
 }
 

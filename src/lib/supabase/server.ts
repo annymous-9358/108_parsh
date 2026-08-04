@@ -8,6 +8,9 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      // v2 is a separate schema in the same Supabase project, so admin
+      // writes made here can never touch the original site's `public` data.
+      db: { schema: "v2" },
       cookies: {
         getAll() {
           return cookieStore.getAll();

@@ -8,7 +8,7 @@ export function TirthaCard({ tirtha, lang }: { tirtha: TirthaSummary; lang: Lang
   return (
     <Link
       href={`/${lang}/tirtha/${tirtha.slug}`}
-      className="group flex flex-col overflow-hidden rounded-sm bg-sandstone border border-sandstone-deep/70 hover:border-gold transition-colors"
+      className="group flex flex-col overflow-hidden rounded-sm bg-sandstone border border-sandstone-deep/70 shadow-[0_1px_2px_rgba(42,31,26,0.06)] transition-all hover:-translate-y-0.5 hover:border-gold hover:shadow-[0_10px_24px_-8px_rgba(122,26,43,0.28)]"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-sandstone-deep/40">
         <Image
@@ -18,7 +18,7 @@ export function TirthaCard({ tirtha, lang }: { tirtha: TirthaSummary; lang: Lang
           sizes="(min-width: 1024px) 24vw, (min-width: 640px) 40vw, 90vw"
           className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
-        <span className="absolute left-2 top-2 rounded-full bg-maroon/90 px-2 py-0.5 font-ui text-[10px] font-medium text-ivory tabular-nums">
+        <span className="bead-badge absolute left-2 top-2 h-6 w-6 font-ui text-[10px] font-semibold tabular-nums">
           {tirtha.entry_number}
         </span>
       </div>

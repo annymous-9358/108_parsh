@@ -1,12 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Phone, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  MapPin,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
+  Gem,
+  Compass,
+  ScrollText,
+  Building2,
+  BookMarked,
+  Landmark,
+  Sparkles,
+  Music2,
+  Navigation,
+  Home,
+} from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MalaRing } from "@/components/MalaRing";
 import { HistoryRecorder } from "@/components/HistoryRecorder";
 import { SpeakButton } from "@/components/SpeakButton";
+import { BeadDivider } from "@/components/BeadDivider";
+import { TirthaSection } from "@/components/TirthaSection";
 import { getAllTirthas, getTirtha, getTirthaImages } from "@/lib/data";
 import { tirthaImageUrl } from "@/lib/image-url";
 import { isLanguageCode, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
@@ -45,6 +62,7 @@ export default async function TirthaDetailPage({
   if (!isLanguageCode(langParam)) notFound();
   const lang: LanguageCode = langParam;
   const t = getUiStrings(lang);
+  const s = t.sections;
 
   const [tirtha, all] = await Promise.all([getTirtha(slug, lang), getAllTirthas(lang)]);
 
@@ -61,6 +79,15 @@ export default async function TirthaDetailPage({
     .map((p) => p.trim())
     .filter(Boolean);
 
+  // Structured sections only exist for Hindi (the source language) —
+  // tirtha_translations has no equivalent columns, so a translated page
+  // falls back to raw_text paragraphs below instead of mixing languages.
+  const hasStructuredContent = !!(
+    tirtha.mulnayak_text ||
+    tirtha.tirth_text ||
+    tirtha.history_text
+  );
+
   return (
     <>
       <Header lang={lang} />
@@ -69,9 +96,14 @@ export default async function TirthaDetailPage({
         <div className="mx-auto max-w-4xl px-5 py-10">
           <div className="mb-3 flex items-start justify-between gap-6">
             <div>
-              <p className="mb-2 font-ui text-xs uppercase tracking-[0.2em] text-gold">
-                {t.entryLabel(tirtha.entry_number, all.length)}
-              </p>
+              <div className="mb-3 flex items-center gap-2.5">
+                <span className="bead-badge h-9 w-9 shrink-0 font-ui text-xs font-semibold">
+                  {tirtha.entry_number}
+                </span>
+                <p className="font-ui text-xs uppercase tracking-[0.2em] text-ink-soft">
+                  {t.entryLabel(tirtha.entry_number, all.length)}
+                </p>
+              </div>
               <h1 className="font-display text-4xl leading-tight text-maroon">
                 {tirtha.title}
               </h1>
@@ -149,11 +181,39 @@ export default async function TirthaDetailPage({
             </div>
           )}
 
-          <article className="prose-none space-y-4 font-body text-[1.05rem] leading-[1.85] text-ink">
-            {paragraphs.map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </article>
+          {hasStructuredContent ? (
+            <div className="flex flex-col gap-4">
+              <TirthaSection icon={Gem} label={s.mulnayak} text={tirtha.mulnayak_text} />
+              {tirtha.address_text && (
+                <p className="flex items-start gap-2 font-ui text-sm text-ink-soft">
+                  <Home className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                  {tirtha.address_text}
+                </p>
+              )}
+
+              <BeadDivider label={s.visitHeading} />
+              <TirthaSection icon={Compass} label={s.tirth} text={tirtha.tirth_text} />
+              <TirthaSection icon={ScrollText} label={s.history} text={tirtha.history_text} />
+              <TirthaSection icon={Building2} label={s.otherTemples} text={tirtha.other_temples_text} />
+              <TirthaSection icon={Navigation} label={t.getDirections} text={tirtha.directions_text} />
+              <TirthaSection icon={BookMarked} label={s.shastra} text={tirtha.shastra_text} />
+              <TirthaSection icon={Landmark} label={s.trust} text={tirtha.trust_text} />
+
+              {(tirtha.stuti_text || tirtha.mantra_text) && (
+                <>
+                  <BeadDivider label={s.devotionHeading} />
+                  <TirthaSection icon={Music2} label={s.stuti} text={tirtha.stuti_text} />
+                  <TirthaSection icon={Sparkles} label={s.mantra} text={tirtha.mantra_text} />
+                </>
+              )}
+            </div>
+          ) : (
+            <article className="prose-none space-y-4 font-body text-[1.05rem] leading-[1.85] text-ink">
+              {paragraphs.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </article>
+          )}
 
           <nav className="mt-14 flex items-center justify-between border-t border-sandstone-deep/60 pt-6">
             {prev ? (

@@ -111,7 +111,7 @@
         "transform": "lodash/{{member}}"
       }
     },
-    "outputFileTracingRoot": "/Users/kunikjain/Desktop/108_parshawanth/app",
+    "outputFileTracingRoot": "/Users/kunikjain/Desktop/108_parshawanth/app-v2",
     "cacheComponents": false,
     "cacheLife": {
       "default": {
@@ -311,11 +311,11 @@
     "bundlePagesRouterDependencies": false,
     "configFileName": "next.config.ts",
     "turbopack": {
-      "root": "/Users/kunikjain/Desktop/108_parshawanth/app"
+      "root": "/Users/kunikjain/Desktop/108_parshawanth/app-v2"
     },
     "distDirRoot": ".next"
   },
-  "appDir": "/Users/kunikjain/Desktop/108_parshawanth/app",
+  "appDir": "/Users/kunikjain/Desktop/108_parshawanth/app-v2",
   "relativeAppDir": "",
   "files": [
     ".next/package.json",

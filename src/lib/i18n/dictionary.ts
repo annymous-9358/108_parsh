@@ -93,6 +93,20 @@ export type UiStrings = {
     loginButton: string;
     adminLanguageLabel: string;
   };
+  sections: {
+    mulnayak: string;
+    tirth: string;
+    history: string;
+    otherTemples: string;
+    shastra: string;
+    trust: string;
+    mantra: string;
+    stuti: string;
+    address: string;
+    aboutHeading: string;
+    visitHeading: string;
+    devotionHeading: string;
+  };
 };
 
 const hi: UiStrings = {
@@ -189,6 +203,20 @@ const hi: UiStrings = {
     pleaseWait: "प्रतीक्षा करें…",
     loginButton: "लॉगिन करें",
     adminLanguageLabel: "Admin भाषा",
+  },
+  sections: {
+    mulnayak: "मूलनायक",
+    tirth: "तीर्थ स्थान",
+    history: "ऐतिहासिकता",
+    otherTemples: "अन्य मंदिर",
+    shastra: "शास्त्र सन्दर्भ",
+    trust: "ट्रस्ट व संपर्क",
+    mantra: "जाप मंत्र",
+    stuti: "स्तुति",
+    address: "पता",
+    aboutHeading: "प्रभु दर्शन",
+    visitHeading: "यात्रा जानकारी",
+    devotionHeading: "आराधना",
   },
 };
 
@@ -287,6 +315,20 @@ const en: UiStrings = {
     loginButton: "Log In",
     adminLanguageLabel: "Admin Language",
   },
+  sections: {
+    mulnayak: "The Principal Deity",
+    tirth: "Location",
+    history: "History",
+    otherTemples: "Other Temples Here",
+    shastra: "Scriptural References",
+    trust: "Trust & Contact",
+    mantra: "Chanting Mantra",
+    stuti: "Hymn of Praise",
+    address: "Address",
+    aboutHeading: "About This Tirtha",
+    visitHeading: "Visiting Information",
+    devotionHeading: "Devotional Texts",
+  },
 };
 
 const gu: UiStrings = {
@@ -384,6 +426,20 @@ const gu: UiStrings = {
     loginButton: "લૉગિન કરો",
     adminLanguageLabel: "Admin ભાષા",
   },
+  sections: {
+    mulnayak: "મૂળનાયક",
+    tirth: "તીર્થ સ્થાન",
+    history: "ઐતિહાસિકતા",
+    otherTemples: "અન્ય મંદિર",
+    shastra: "શાસ્ત્ર સંદર્ભ",
+    trust: "ટ્રસ્ટ અને સંપર્ક",
+    mantra: "જાપ મંત્ર",
+    stuti: "સ્તુતિ",
+    address: "સરનામું",
+    aboutHeading: "પ્રભુ દર્શન",
+    visitHeading: "યાત્રા માહિતી",
+    devotionHeading: "આરાધના",
+  },
 };
 
 const mr: UiStrings = {
@@ -480,6 +536,20 @@ const mr: UiStrings = {
     pleaseWait: "कृपया प्रतीक्षा करा…",
     loginButton: "लॉगिन करा",
     adminLanguageLabel: "Admin भाषा",
+  },
+  sections: {
+    mulnayak: "मूळनायक",
+    tirth: "तीर्थ स्थान",
+    history: "ऐतिहासिकता",
+    otherTemples: "इतर मंदिरे",
+    shastra: "शास्त्र संदर्भ",
+    trust: "ट्रस्ट व संपर्क",
+    mantra: "जप मंत्र",
+    stuti: "स्तुती",
+    address: "पत्ता",
+    aboutHeading: "प्रभू दर्शन",
+    visitHeading: "प्रवास माहिती",
+    devotionHeading: "आराधना",
   },
 };
 
