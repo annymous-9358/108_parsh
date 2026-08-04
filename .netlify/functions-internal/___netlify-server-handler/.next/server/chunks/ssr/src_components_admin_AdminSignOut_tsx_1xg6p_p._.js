@@ -1,3 +1,0 @@
-module.exports=[36232,a=>{"use strict";var b=a.i(87924),c=a.i(50944),d=a.i(95445);a.s(["AdminSignOut",0,function({label:a}){let e=(0,c.useRouter)();return(0,b.jsx)("button",{onClick:async()=>{let a=(0,d.createClient)();await a.auth.signOut(),e.push("/admin/login"),e.refresh()},className:"rounded-sm border border-sandstone-deep px-4 py-2 font-ui text-sm text-ink-soft hover:border-maroon hover:text-maroon transition-colors",children:a})}])}];
-
-//# sourceMappingURL=src_components_admin_AdminSignOut_tsx_1xg6p_p._.js.map
