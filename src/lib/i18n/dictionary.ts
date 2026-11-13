@@ -53,6 +53,7 @@ export type UiStrings = {
     filterPending: string;
     allDoneMessage: string;
     savedLocally: string;
+    savedPermanently: string;
     nextToVisit: string;
   };
   admin: {
@@ -177,6 +178,7 @@ const hi: UiStrings = {
     filterPending: "शेष",
     allDoneMessage: "अनुमोदना! आपने सभी तीर्थों के दर्शन पूर्ण कर लिए हैं।",
     savedLocally: "प्रगति इसी डिवाइस पर सुरक्षित है।",
+    savedPermanently: "आपकी प्रगति स्थायी रूप से सुरक्षित है।",
     nextToVisit: "अगला तीर्थ",
   },
   admin: {
@@ -302,6 +304,7 @@ const en: UiStrings = {
     filterPending: "Remaining",
     allDoneMessage: "Anumodana! You have completed darshan of every tirtha.",
     savedLocally: "Progress is saved on this device.",
+    savedPermanently: "Your progress is saved permanently.",
     nextToVisit: "Next tirtha",
   },
   admin: {
@@ -427,6 +430,7 @@ const gu: UiStrings = {
     filterPending: "બાકી",
     allDoneMessage: "અનુમોદના! આપે બધા તીર્થોના દર્શન પૂર્ણ કર્યા છે.",
     savedLocally: "પ્રગતિ આ ડિવાઇસ પર સાચવેલ છે.",
+    savedPermanently: "આપની પ્રગતિ કાયમી રીતે સાચવેલ છે.",
     nextToVisit: "આગળનું તીર્થ",
   },
   admin: {
@@ -552,6 +556,7 @@ const mr: UiStrings = {
     filterPending: "बाकी",
     allDoneMessage: "अनुमोदना! तुम्ही सर्व तीर्थांचे दर्शन पूर्ण केले आहे.",
     savedLocally: "प्रगती याच डिव्हाइसवर जतन आहे.",
+    savedPermanently: "तुमची प्रगती कायमस्वरूपी जतन आहे.",
     nextToVisit: "पुढील तीर्थ",
   },
   admin: {

@@ -125,7 +125,7 @@ export function MarkCompleteButton({ slug, lang, allSlugs, variant = "inline" }:
           {doneCount === total ? t.allDoneMessage : "जय जिनेन्द्र"}
         </p>
       )}
-      <p className="mt-4 font-ui text-[11px] text-ink-soft">{t.savedLocally}</p>
+      <p className="mt-4 font-ui text-[11px] text-ink-soft">{process.env.NEXT_PUBLIC_SUPABASE_URL ? t.savedPermanently : t.savedLocally}</p>
     </section>
   );
 }

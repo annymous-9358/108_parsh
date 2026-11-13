@@ -1,12 +1,18 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { ensureAnonSession } from "@/lib/supabase/ensure-session";
 
 /**
- * "Darshan complete" tracking. Stored per device in localStorage, keyed by
- * tirtha slug (slugs are language-independent, so progress carries across
- * every UI language). Deliberately client-only: it needs no database
- * schema change and works with or without Supabase configured.
+ * "Darshan complete" tracking, keyed by tirtha slug (slugs are
+ * language-independent, so progress carries across every UI language).
+ *
+ * Supabase (v2.tirtha_completions, one row per user + slug) is the permanent
+ * record, tied to the visitor's anonymous auth user. localStorage is a local
+ * cache so the UI is instant and still works offline or when Supabase isn't
+ * configured. On first use the two are merged: server rows are pulled in and
+ * any device-only completions are pushed up.
  */
 const KEY = "parsh108:completed:v1";
 const EVENT = "parsh108:completed-change";
@@ -45,7 +51,55 @@ function write(next: Set<string>) {
   window.dispatchEvent(new Event(EVENT));
 }
 
+const hasSupabase = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+let syncStarted = false;
+let supabase: ReturnType<typeof createClient> | null = null;
+
+function client() {
+  if (!supabase) supabase = createClient();
+  return supabase;
+}
+
+/** One-time pull + merge with the server copy for this visitor. */
+async function syncFromServer() {
+  const sb = client();
+  const userId = await ensureAnonSession(sb);
+  if (!userId) return;
+  const { data, error } = await sb.from("tirtha_completions").select("tirtha_slug");
+  if (error || !data) return; // table missing / offline — stay on local cache
+  const server = new Set(data.map((r: { tirtha_slug: string }) => r.tirtha_slug));
+  const local = read();
+  const localOnly = Array.from(local).filter((slug) => !server.has(slug));
+  if (localOnly.length > 0) {
+    await sb
+      .from("tirtha_completions")
+      .upsert(localOnly.map((tirtha_slug) => ({ tirtha_slug })), {
+        onConflict: "user_id,tirtha_slug",
+        ignoreDuplicates: true,
+      });
+  }
+  write(new Set([...server, ...read()]));
+}
+
+async function pushChange(slug: string, done: boolean) {
+  if (!hasSupabase) return;
+  const sb = client();
+  const userId = await ensureAnonSession(sb);
+  if (!userId) return;
+  if (done) {
+    await sb
+      .from("tirtha_completions")
+      .upsert({ tirtha_slug: slug }, { onConflict: "user_id,tirtha_slug", ignoreDuplicates: true });
+  } else {
+    await sb.from("tirtha_completions").delete().eq("tirtha_slug", slug);
+  }
+}
+
 function subscribe(cb: () => void) {
+  if (hasSupabase && !syncStarted) {
+    syncStarted = true;
+    syncFromServer().catch(() => {});
+  }
   const onStorage = (e: StorageEvent) => {
     if (e.key === KEY) cb();
   };
@@ -69,9 +123,11 @@ export function useCompleted() {
 
   const toggle = useCallback((slug: string) => {
     const next = new Set(read());
-    if (next.has(slug)) next.delete(slug);
-    else next.add(slug);
-    write(next);
+    const done = !next.has(slug);
+    if (done) next.add(slug);
+    else next.delete(slug);
+    write(next); // optimistic local update
+    pushChange(slug, done).catch(() => {});
   }, []);
 
   return { completed, toggle, hydrated };
