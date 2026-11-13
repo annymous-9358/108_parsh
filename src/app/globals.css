@@ -143,3 +143,79 @@ body {
 .text-ink-soft {
   color: var(--color-ink-soft);
 }
+
+/* ---- Yatra progress / design polish ---- */
+@keyframes seal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Thin gold hairline that draws in under the card on hover — echoes the strand of the mala. */
+.tirtha-card {
+  position: relative;
+}
+.tirtha-card::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-saffron), var(--color-maroon));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 450ms ease;
+}
+.tirtha-card:hover::after,
+.tirtha-card:focus-visible::after {
+  transform: scaleX(1);
+}
+
+main {
+  animation: fade-up 420ms ease-out both;
+}
+
+/* Header nav links: animated underline. */
+.nav-link {
+  position: relative;
+  padding-block: 2px;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--color-maroon);
+  transform: scaleX(0);
+  transition: transform 250ms ease;
+}
+.nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+/* Native scrollbars in the warm palette. */
+html {
+  scrollbar-color: var(--color-sandstone-deep) transparent;
+}

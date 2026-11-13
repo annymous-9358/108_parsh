@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useCompleted } from "@/lib/progress";
 
 type MalaRingProps = {
   total: number;
@@ -9,6 +10,8 @@ type MalaRingProps = {
   /** Slugs in entry order (1-indexed by position) — when given (with lang), beads link to a tirtha. */
   slugs?: string[];
   lang?: string;
+  /** Slugs in entry order used only to light up completed beads (no links). */
+  progressSlugs?: string[];
   className?: string;
 };
 
@@ -23,8 +26,11 @@ export function MalaRing({
   size = 440,
   slugs,
   lang = "hi",
+  progressSlugs,
   className = "",
 }: MalaRingProps) {
+  const { completed } = useCompleted();
+  const orderSlugs = slugs ?? progressSlugs;
   const r = size / 2;
   const beadOrbit = r - 18;
   const beads = Array.from({ length: total }, (_, i) => i + 1);
@@ -52,14 +58,25 @@ export function MalaRing({
         const cx = r + beadOrbit * Math.cos(angle);
         const cy = r + beadOrbit * Math.sin(angle);
         const isCurrent = n === current;
+        const s = orderSlugs?.[n - 1];
+        const isDone = !!s && completed.has(s);
+        const baseR = size < 160 ? 3.4 : 3.6;
         const bead = (
           <circle
             cx={cx}
             cy={cy}
-            r={isCurrent ? 7 : 3.4}
-            fill={isCurrent ? "var(--color-maroon)" : "var(--color-gold)"}
-            opacity={isCurrent ? 1 : 0.55}
-            className="transition-all duration-300"
+            r={isCurrent ? 7 : isDone ? baseR + 1.1 : baseR}
+            fill={
+              isCurrent
+                ? "var(--color-maroon)"
+                : isDone
+                  ? "var(--color-saffron)"
+                  : "var(--color-gold)"
+            }
+            stroke={isDone && !isCurrent ? "var(--color-gold-bright)" : "none"}
+            strokeWidth={isDone ? 0.8 : 0}
+            opacity={isCurrent || isDone ? 1 : 0.5}
+            className="transition-all duration-500"
           />
         );
         const slug = slugs?.[n - 1];

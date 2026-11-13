@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { MalaRing } from "@/components/MalaRing";
 import { TirthaCard } from "@/components/TirthaCard";
 import { ContinueReading } from "@/components/ContinueReading";
+import { YatraProgress } from "@/components/progress/YatraProgress";
 import { getAllTirthas } from "@/lib/data";
 import { isLanguageCode, type LanguageCode } from "@/lib/i18n/languages";
 import { getUiStrings } from "@/lib/i18n/dictionary";
@@ -25,6 +26,7 @@ export default async function HomePage({
 
   const tirthas = (await getAllTirthas(lang)).map(toTirthaSummary);
   const featured = tirthas.slice(0, 8);
+  const slugs = tirthas.map((x) => x.slug);
 
   return (
     <>
@@ -44,6 +46,7 @@ export default async function HomePage({
               <MalaRing
                 total={tirthas.length || 108}
                 size={380}
+                progressSlugs={slugs}
                 className="max-w-full text-maroon"
               />
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 px-10">
@@ -80,11 +83,18 @@ export default async function HomePage({
           </div>
         </section>
 
+        <div className="mx-auto max-w-3xl px-5 empty:hidden">
+          <YatraProgress lang={lang} slugs={slugs} className="mb-12" />
+        </div>
+
         <ContinueReading lang={lang} />
 
         <section className="mx-auto max-w-6xl px-5 pb-24">
-          <div className="mb-6 flex items-baseline justify-between">
-            <h2 className="font-display text-2xl text-ink">{t.featuredHeading}</h2>
+          <div className="mb-6 flex items-baseline justify-between gap-4">
+            <h2 className="flex items-center gap-3 font-display text-2xl text-ink">
+              <span className="bead-badge h-2.5 w-2.5" aria-hidden />
+              {t.featuredHeading}
+            </h2>
             <Link href={`/${lang}/tirthas`} className="font-ui text-xs text-maroon hover:underline">
               {t.viewAll}
             </Link>

@@ -6,7 +6,7 @@ import { getUiStrings } from "@/lib/i18n/dictionary";
 export function Header({ lang }: { lang: LanguageCode }) {
   const t = getUiStrings(lang);
   return (
-    <header className="sticky top-0 z-30 border-b border-sandstone-deep/60 bg-ivory/90 backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-sandstone-deep/60 bg-ivory/85 backdrop-blur-md shadow-[0_1px_0_color-mix(in_oklab,var(--color-gold)_25%,transparent)]">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1.5 px-4 py-3 sm:flex-nowrap sm:justify-between sm:px-5 sm:py-3.5">
         <Link href={`/${lang}`} className="flex items-baseline gap-2.5 group">
           <span className="font-display text-xl leading-none text-maroon group-hover:text-maroon-deep transition-colors sm:text-2xl">
@@ -17,13 +17,13 @@ export function Header({ lang }: { lang: LanguageCode }) {
           </span>
         </Link>
         <nav className="font-ui flex items-center gap-3 text-xs sm:gap-5 sm:text-sm text-ink">
-          <Link href={`/${lang}/tirthas`} className="hover:text-maroon transition-colors">
+          <Link href={`/${lang}/tirthas`} className="nav-link hover:text-maroon transition-colors">
             {t.navList}
           </Link>
-          <Link href={`/${lang}/about`} className="hover:text-maroon transition-colors">
+          <Link href={`/${lang}/about`} className="nav-link hover:text-maroon transition-colors">
             {t.navHistory}
           </Link>
-          <Link href={`/${lang}/map`} className="hover:text-maroon transition-colors">
+          <Link href={`/${lang}/map`} className="nav-link hover:text-maroon transition-colors">
             {t.navMap}
           </Link>
           <Link

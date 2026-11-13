@@ -24,6 +24,7 @@ import { HistoryRecorder } from "@/components/HistoryRecorder";
 import { SpeakButton } from "@/components/SpeakButton";
 import { BeadDivider } from "@/components/BeadDivider";
 import { TirthaSection } from "@/components/TirthaSection";
+import { MarkCompleteButton } from "@/components/progress/MarkCompleteButton";
 import { getAllTirthas, getTirtha, getTirthaImages } from "@/lib/data";
 import { tirthaImageUrl } from "@/lib/image-url";
 import { isLanguageCode, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
@@ -73,6 +74,7 @@ export default async function TirthaDetailPage({
   const idx = all.findIndex((x) => x.slug === slug);
   const prev = idx > 0 ? all[idx - 1] : null;
   const next = idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null;
+  const allSlugs = all.map((x) => x.slug);
 
   const paragraphs = (tirtha.raw_text ?? "")
     .split("\n")
@@ -112,7 +114,7 @@ export default async function TirthaDetailPage({
               total={all.length}
               current={tirtha.entry_number}
               size={84}
-              slugs={all.map((x) => x.slug)}
+              slugs={allSlugs}
               lang={lang}
               className="hidden shrink-0 sm:block"
             />
@@ -125,6 +127,7 @@ export default async function TirthaDetailPage({
           )}
 
           <div className="mb-8 flex flex-wrap items-center gap-3">
+            <MarkCompleteButton slug={tirtha.slug} lang={lang} allSlugs={allSlugs} />
             {tirtha.maps_url && (
               <a
                 href={tirtha.maps_url}
@@ -215,13 +218,20 @@ export default async function TirthaDetailPage({
             </article>
           )}
 
-          <nav className="mt-14 flex items-center justify-between border-t border-sandstone-deep/60 pt-6">
+          <MarkCompleteButton
+            slug={tirtha.slug}
+            lang={lang}
+            allSlugs={allSlugs}
+            variant="panel"
+          />
+
+          <nav className="mt-10 flex items-center justify-between border-t border-sandstone-deep/60 pt-6">
             {prev ? (
               <Link
                 href={`/${lang}/tirtha/${prev.slug}`}
-                className="group flex items-center gap-1.5 font-ui text-sm text-ink-soft hover:text-maroon transition-colors"
+                className="group flex items-center gap-2 rounded-md border border-transparent px-3 py-2 font-ui text-sm text-ink-soft transition-all hover:border-sandstone-deep hover:bg-sandstone/70 hover:text-maroon"
               >
-                <ChevronLeft className="h-4 w-4" aria-hidden />
+                <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
                 <span className="max-w-[10rem] truncate sm:max-w-xs">{prev.title}</span>
               </Link>
             ) : (
@@ -230,10 +240,10 @@ export default async function TirthaDetailPage({
             {next ? (
               <Link
                 href={`/${lang}/tirtha/${next.slug}`}
-                className="group flex items-center gap-1.5 text-right font-ui text-sm text-ink-soft hover:text-maroon transition-colors"
+                className="group flex items-center gap-2 rounded-md border border-transparent px-3 py-2 text-right font-ui text-sm text-ink-soft transition-all hover:border-sandstone-deep hover:bg-sandstone/70 hover:text-maroon"
               >
                 <span className="max-w-[10rem] truncate sm:max-w-xs">{next.title}</span>
-                <ChevronRight className="h-4 w-4" aria-hidden />
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Link>
             ) : (
               <span />

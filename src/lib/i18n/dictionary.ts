@@ -41,6 +41,20 @@ export type UiStrings = {
   footerCredit: string;
   languageLabel: string;
   translationNotice: string;
+  progress: {
+    markComplete: string;
+    completed: string;
+    undo: string;
+    yatraProgress: string;
+    countLabel: (done: number, total: number) => string;
+    remaining: (n: number) => string;
+    filterAll: string;
+    filterDone: string;
+    filterPending: string;
+    allDoneMessage: string;
+    savedLocally: string;
+    nextToVisit: string;
+  };
   admin: {
     setupPendingTitle: string;
     setupPendingBody: string;
@@ -151,6 +165,20 @@ const hi: UiStrings = {
   footerCredit: "मूल स्रोत: राजेन्द्र कुमार जैन, पार्श्व सदन, पार्श्व नगर, डूंगरपुर",
   languageLabel: "भाषा",
   translationNotice: "यह अनुवाद अभी तैयार नहीं है — मूल हिंदी पाठ दिखाया जा रहा है।",
+  progress: {
+    markComplete: "दर्शन पूर्ण चिह्नित करें",
+    completed: "दर्शन पूर्ण",
+    undo: "पूर्ण हटाएँ",
+    yatraProgress: "आपकी तीर्थ यात्रा",
+    countLabel: (d, t) => `${d} / ${t} तीर्थ दर्शन पूर्ण`,
+    remaining: (n) => `${n} तीर्थ शेष`,
+    filterAll: "सभी",
+    filterDone: "पूर्ण",
+    filterPending: "शेष",
+    allDoneMessage: "अनुमोदना! आपने सभी तीर्थों के दर्शन पूर्ण कर लिए हैं।",
+    savedLocally: "प्रगति इसी डिवाइस पर सुरक्षित है।",
+    nextToVisit: "अगला तीर्थ",
+  },
   admin: {
     setupPendingTitle: "Admin सेटअप बाकी है",
     setupPendingBody:
@@ -262,6 +290,20 @@ const en: UiStrings = {
   footerCredit: "Original source: Rajendra Kumar Jain, Parshv Sadan, Parshv Nagar, Dungarpur",
   languageLabel: "Language",
   translationNotice: "This translation isn't ready yet — showing the original Hindi text.",
+  progress: {
+    markComplete: "Mark as complete",
+    completed: "Darshan complete",
+    undo: "Mark incomplete",
+    yatraProgress: "Your yatra",
+    countLabel: (d, t) => `${d} of ${t} tirthas complete`,
+    remaining: (n) => `${n} remaining`,
+    filterAll: "All",
+    filterDone: "Completed",
+    filterPending: "Remaining",
+    allDoneMessage: "Anumodana! You have completed darshan of every tirtha.",
+    savedLocally: "Progress is saved on this device.",
+    nextToVisit: "Next tirtha",
+  },
   admin: {
     setupPendingTitle: "Admin setup pending",
     setupPendingBody:
@@ -373,6 +415,20 @@ const gu: UiStrings = {
   footerCredit: "મૂળ સ્રોત: રાજેન્દ્ર કુમાર જૈન, પાર્શ્વ સદન, પાર્શ્વ નગર, ડુંગરપુર",
   languageLabel: "ભાષા",
   translationNotice: "આ અનુવાદ હજુ તૈયાર નથી — મૂળ હિન્દી લખાણ બતાવવામાં આવ્યું છે.",
+  progress: {
+    markComplete: "દર્શન પૂર્ણ ચિહ્નિત કરો",
+    completed: "દર્શન પૂર્ણ",
+    undo: "પૂર્ણ દૂર કરો",
+    yatraProgress: "આપની તીર્થ યાત્રા",
+    countLabel: (d, t) => `${d} / ${t} તીર્થ દર્શન પૂર્ણ`,
+    remaining: (n) => `${n} તીર્થ બાકી`,
+    filterAll: "બધા",
+    filterDone: "પૂર્ણ",
+    filterPending: "બાકી",
+    allDoneMessage: "અનુમોદના! આપે બધા તીર્થોના દર્શન પૂર્ણ કર્યા છે.",
+    savedLocally: "પ્રગતિ આ ડિવાઇસ પર સાચવેલ છે.",
+    nextToVisit: "આગળનું તીર્થ",
+  },
   admin: {
     setupPendingTitle: "Admin સેટઅપ બાકી છે",
     setupPendingBody:
@@ -484,6 +540,20 @@ const mr: UiStrings = {
   footerCredit: "मूळ स्रोत: राजेंद्र कुमार जैन, पार्श्व सदन, पार्श्व नगर, डुंगरपूर",
   languageLabel: "भाषा",
   translationNotice: "हे भाषांतर अद्याप तयार नाही — मूळ हिंदी मजकूर दाखवला जात आहे.",
+  progress: {
+    markComplete: "दर्शन पूर्ण म्हणून चिन्हांकित करा",
+    completed: "दर्शन पूर्ण",
+    undo: "पूर्ण काढा",
+    yatraProgress: "तुमची तीर्थ यात्रा",
+    countLabel: (d, t) => `${d} / ${t} तीर्थ दर्शन पूर्ण`,
+    remaining: (n) => `${n} तीर्थ बाकी`,
+    filterAll: "सर्व",
+    filterDone: "पूर्ण",
+    filterPending: "बाकी",
+    allDoneMessage: "अनुमोदना! तुम्ही सर्व तीर्थांचे दर्शन पूर्ण केले आहे.",
+    savedLocally: "प्रगती याच डिव्हाइसवर जतन आहे.",
+    nextToVisit: "पुढील तीर्थ",
+  },
   admin: {
     setupPendingTitle: "Admin सेटअप बाकी आहे",
     setupPendingBody:
