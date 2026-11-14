@@ -54,6 +54,15 @@ export type UiStrings = {
     allDoneMessage: string;
     savedLocally: string;
     savedPermanently: string;
+    legendDone: string;
+    legendPending: string;
+    toastDone: (title: string) => string;
+    toastUndone: (title: string) => string;
+    backToTop: string;
+    close: string;
+    prevPhoto: string;
+    nextPhoto: string;
+    openPhoto: (n: number) => string;
     nextToVisit: string;
   };
   admin: {
@@ -179,6 +188,15 @@ const hi: UiStrings = {
     allDoneMessage: "अनुमोदना! आपने सभी तीर्थों के दर्शन पूर्ण कर लिए हैं।",
     savedLocally: "प्रगति इसी डिवाइस पर सुरक्षित है।",
     savedPermanently: "आपकी प्रगति स्थायी रूप से सुरक्षित है।",
+    legendDone: "दर्शन पूर्ण",
+    legendPending: "दर्शन शेष",
+    toastDone: (t) => `${t} — दर्शन पूर्ण 🙏`,
+    toastUndone: (t) => `${t} — पूर्ण हटाया गया`,
+    backToTop: "ऊपर जाएँ",
+    close: "बंद करें",
+    prevPhoto: "पिछली फोटो",
+    nextPhoto: "अगली फोटो",
+    openPhoto: (n) => `फोटो ${n} बड़ा देखें`,
     nextToVisit: "अगला तीर्थ",
   },
   admin: {
@@ -305,6 +323,15 @@ const en: UiStrings = {
     allDoneMessage: "Anumodana! You have completed darshan of every tirtha.",
     savedLocally: "Progress is saved on this device.",
     savedPermanently: "Your progress is saved permanently.",
+    legendDone: "Darshan complete",
+    legendPending: "Not yet visited",
+    toastDone: (t) => `${t} — darshan complete 🙏`,
+    toastUndone: (t) => `${t} — marked incomplete`,
+    backToTop: "Back to top",
+    close: "Close",
+    prevPhoto: "Previous photo",
+    nextPhoto: "Next photo",
+    openPhoto: (n) => `Open photo ${n}`,
     nextToVisit: "Next tirtha",
   },
   admin: {
@@ -431,6 +458,15 @@ const gu: UiStrings = {
     allDoneMessage: "અનુમોદના! આપે બધા તીર્થોના દર્શન પૂર્ણ કર્યા છે.",
     savedLocally: "પ્રગતિ આ ડિવાઇસ પર સાચવેલ છે.",
     savedPermanently: "આપની પ્રગતિ કાયમી રીતે સાચવેલ છે.",
+    legendDone: "દર્શન પૂર્ણ",
+    legendPending: "દર્શન બાકી",
+    toastDone: (t) => `${t} — દર્શન પૂર્ણ 🙏`,
+    toastUndone: (t) => `${t} — પૂર્ણ દૂર કર્યું`,
+    backToTop: "ઉપર જાઓ",
+    close: "બંધ કરો",
+    prevPhoto: "પાછલો ફોટો",
+    nextPhoto: "આગળનો ફોટો",
+    openPhoto: (n) => `ફોટો ${n} મોટો જુઓ`,
     nextToVisit: "આગળનું તીર્થ",
   },
   admin: {
@@ -557,6 +593,15 @@ const mr: UiStrings = {
     allDoneMessage: "अनुमोदना! तुम्ही सर्व तीर्थांचे दर्शन पूर्ण केले आहे.",
     savedLocally: "प्रगती याच डिव्हाइसवर जतन आहे.",
     savedPermanently: "तुमची प्रगती कायमस्वरूपी जतन आहे.",
+    legendDone: "दर्शन पूर्ण",
+    legendPending: "दर्शन बाकी",
+    toastDone: (t) => `${t} — दर्शन पूर्ण 🙏`,
+    toastUndone: (t) => `${t} — पूर्ण काढले`,
+    backToTop: "वर जा",
+    close: "बंद करा",
+    prevPhoto: "मागील फोटो",
+    nextPhoto: "पुढील फोटो",
+    openPhoto: (n) => `फोटो ${n} मोठा पाहा`,
     nextToVisit: "पुढील तीर्थ",
   },
   admin: {

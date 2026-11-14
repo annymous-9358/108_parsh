@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Locate, Navigation } from "lucide-react";
+import { Locate, Navigation, Check, Maximize2 } from "lucide-react";
 import type { TirthaMapPoint } from "@/lib/types";
+import { useCompleted, toggleCompleted, getCompleted } from "@/lib/progress";
 import type { LanguageCode } from "@/lib/i18n/languages";
 import { getUiStrings } from "@/lib/i18n/dictionary";
 
@@ -37,6 +38,18 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 type NearbyEntry = TirthaMapPoint & { distanceKm: number };
+type StatusFilter = "all" | "done" | "pending";
+
+/** Teardrop pin: maroon with the entry number, or green with a check once darshan is complete. */
+function pinIcon(L: typeof import("leaflet"), n: number, done: boolean) {
+  return L.divIcon({
+    className: "",
+    html: `<div class="tm-pin ${done ? "tm-pin--done" : ""}"><span>${done ? "&#10003;" : n}</span></div>`,
+    iconSize: [30, 40],
+    iconAnchor: [15, 38],
+    popupAnchor: [0, -34],
+  });
+}
 
 export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: LanguageCode }) {
   const t = getUiStrings(lang);
@@ -53,6 +66,14 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
   const mapRef = useRef<L.Map | null>(null);
   const leafletRef = useRef<typeof L | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
+  const markersRef = useRef(new Map<string, { marker: L.Marker; point: TirthaMapPoint }>());
+  const layerRef = useRef<L.LayerGroup | null>(null);
+  const filterRef = useRef<StatusFilter>("all");
+
+  const { completed, hydrated } = useCompleted();
+  const [filter, setFilter] = useState<StatusFilter>("all");
+  const placed = points.filter((p) => p.latitude != null && p.longitude != null);
+  const doneCount = hydrated ? placed.filter((p) => completed.has(p.slug)).length : 0;
 
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -60,24 +81,12 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
 
   useEffect(() => {
     let cancelled = false;
+    const markers = markersRef.current;
 
     (async () => {
       const L = (await import("leaflet")).default;
       if (cancelled || !containerRef.current || mapRef.current) return;
       leafletRef.current = L;
-
-      // Default Leaflet marker icon URLs assume a bundler that copies the
-      // image assets alongside the JS; Next.js doesn't, so point at a CDN
-      // that serves the exact same Leaflet-release icons instead.
-      const icon = L.icon({
-        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      });
 
       const map = L.map(containerRef.current, {
         center: [22.5, 78.5],
@@ -91,26 +100,24 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
         maxZoom: 19,
       }).addTo(map);
 
+      const layer = L.layerGroup().addTo(map);
+      layerRef.current = layer;
+      const doneNow = getCompleted();
       const bounds: [number, number][] = [];
       for (const p of points) {
         if (p.latitude == null || p.longitude == null) continue;
         bounds.push([p.latitude, p.longitude]);
-        const marker = L.marker([p.latitude, p.longitude], { icon }).addTo(map);
-        const place = [p.city, p.state].filter(Boolean).join(", ");
-        const detailHref = `/${lang}/tirtha/${p.slug}`;
-        const directionsHref =
-          p.maps_url ?? `https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`;
-        marker.bindPopup(
-          `<div style="font-family:inherit;min-width:180px">
-            <a href="${detailHref}" style="font-weight:600;color:#7a1f2b;text-decoration:none">${escapeHtml(p.title)}</a>
-            ${place ? `<div style="font-size:12px;color:#6b6058;margin-top:2px">${escapeHtml(place)}</div>` : ""}
-            <a href="${directionsHref}" target="_blank" rel="noopener noreferrer"
-               style="display:inline-block;margin-top:6px;font-size:12px;color:#7a1f2b;text-decoration:underline">
-               ${escapeHtml(getDirectionsLabel)}
-            </a>
-          </div>`,
-        );
+        const marker = L.marker([p.latitude, p.longitude], {
+          icon: pinIcon(L, p.entry_number, doneNow.has(p.slug)),
+          title: p.title,
+          riseOnHover: true,
+        });
+        // Popup content is rebuilt on every open so the button reflects the
+        // current completion state.
+        marker.bindPopup(() => buildPopup(p), { minWidth: 210, className: "tm-popup" });
+        markersRef.current.set(p.slug, { marker, point: p });
       }
+      applyMarkers();
       if (bounds.length > 0) {
         map.fitBounds(bounds, { padding: [30, 30] });
       }
@@ -122,9 +129,75 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
         mapRef.current.remove();
         mapRef.current = null;
       }
+      markers.clear();
+      layerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- points/lang/label are stable per page load
   }, []);
+
+  function buildPopup(p: TirthaMapPoint): HTMLElement {
+    const done = getCompleted().has(p.slug);
+    const place = [p.city, p.state].filter(Boolean).join(", ");
+    const detailHref = `/${lang}/tirtha/${p.slug}`;
+    const directionsHref =
+      p.maps_url ?? `https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`;
+    const el = document.createElement("div");
+    el.className = "tm-popup-body";
+    el.innerHTML = `
+      <div class="tm-popup-num">#${p.entry_number}${
+        done ? ` · <span class="tm-popup-done">&#10003; ${escapeHtml(t.progress.legendDone)}</span>` : ""
+      }</div>
+      <a class="tm-popup-title" href="${detailHref}">${escapeHtml(p.title)}</a>
+      ${place ? `<div class="tm-popup-place">${escapeHtml(place)}</div>` : ""}
+      <div class="tm-popup-actions">
+        <button type="button" class="tm-popup-toggle ${done ? "is-done" : ""}">
+          ${escapeHtml(done ? t.progress.undo : t.progress.markComplete)}
+        </button>
+        <a class="tm-popup-link" href="${directionsHref}" target="_blank" rel="noopener noreferrer">
+          ${escapeHtml(getDirectionsLabel)} &#8599;
+        </a>
+      </div>`;
+    // Keep clicks inside the popup from reaching the map (which would close it).
+    leafletRef.current?.DomEvent.disableClickPropagation(el);
+    el.querySelector("button")?.addEventListener("click", () => {
+      toggleCompleted(p.slug, p.title);
+      const entry = markersRef.current.get(p.slug);
+      if (entry) entry.marker.setPopupContent(buildPopup(p));
+    });
+    return el;
+  }
+
+  /** Sync every marker's icon + visibility with completion state and the active filter. */
+  function applyMarkers() {
+    const L = leafletRef.current;
+    const layer = layerRef.current;
+    if (!L || !layer) return;
+    const done = getCompleted();
+    const f = filterRef.current;
+    for (const { marker, point } of markersRef.current.values()) {
+      const isDone = done.has(point.slug);
+      marker.setIcon(pinIcon(L, point.entry_number, isDone));
+      marker.setZIndexOffset(isDone ? 0 : 100);
+      const visible = f === "all" || (f === "done" ? isDone : !isDone);
+      if (visible && !layer.hasLayer(marker)) layer.addLayer(marker);
+      if (!visible && layer.hasLayer(marker)) layer.removeLayer(marker);
+    }
+  }
+
+  useEffect(() => {
+    filterRef.current = filter;
+    applyMarkers();
+     
+  }, [filter, completed]);
+
+  const fitAll = () => {
+    const map = mapRef.current;
+    const layer = layerRef.current;
+    const L = leafletRef.current;
+    if (!map || !layer || !L) return;
+    const latlngs = layer.getLayers().map((m) => (m as L.Marker).getLatLng());
+    if (latlngs.length > 0) map.fitBounds(L.latLngBounds(latlngs), { padding: [30, 30] });
+  };
 
   const findNearby = useCallback(() => {
     if (typeof window === "undefined" || !("geolocation" in navigator)) {
@@ -173,20 +246,85 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
 
   return (
     <div>
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={findNearby}
           disabled={locating}
-          className="inline-flex items-center gap-2 rounded-sm bg-maroon px-4 py-2 font-ui text-sm font-medium text-ivory transition-colors hover:bg-maroon-deep disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-sm bg-maroon px-4 py-2 font-ui text-sm font-medium text-ivory transition-all hover:-translate-y-0.5 hover:bg-maroon-deep disabled:opacity-60"
         >
-          <Locate className="h-4 w-4" aria-hidden />
+          <Locate className={`h-4 w-4 ${locating ? "animate-spin" : ""}`} aria-hidden />
           {locating ? locatingLabel : findNearbyLabel}
         </button>
-        {locationError && <p className="mt-2 font-ui text-xs text-maroon">{locationError}</p>}
+        <div
+          role="radiogroup"
+          aria-label={t.progress.yatraProgress}
+          className="inline-flex rounded-full border border-sandstone-deep bg-sandstone/70 p-1 font-ui text-xs"
+        >
+          {(
+            [
+              ["all", t.progress.filterAll, placed.length],
+              ["done", t.progress.filterDone, doneCount],
+              ["pending", t.progress.filterPending, placed.length - doneCount],
+            ] as const
+          ).map(([key, label, count]) => (
+            <button
+              key={key}
+              type="button"
+              role="radio"
+              aria-checked={filter === key}
+              onClick={() => setFilter(key)}
+              className={`rounded-full px-3.5 py-1.5 transition-colors ${
+                filter === key ? "bg-maroon text-ivory shadow-sm" : "text-ink-soft hover:text-maroon"
+              }`}
+            >
+              {label}
+              <span className="ml-1.5 tabular-nums opacity-70">{hydrated ? count : "–"}</span>
+            </button>
+          ))}
+        </div>
       </div>
+      {locationError && <p className="mb-3 font-ui text-xs text-maroon">{locationError}</p>}
 
-      <div ref={containerRef} className="h-[65vh] w-full rounded-sm border border-sandstone-deep" />
+      <div className="relative">
+        <div
+          ref={containerRef}
+          className="h-[65vh] min-h-[420px] w-full overflow-hidden rounded-md border border-sandstone-deep shadow-[0_10px_30px_-18px_rgba(42,31,26,0.45)]"
+        />
+        {/* Legend + progress overlay */}
+        <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex flex-col gap-2">
+          <div className="pointer-events-auto rounded-md border border-sandstone-deep bg-ivory/95 px-3 py-2.5 font-ui text-xs shadow-md backdrop-blur">
+            <p className="mb-1.5 font-semibold text-ink">
+              {hydrated ? t.progress.countLabel(doneCount, placed.length) : t.progress.yatraProgress}
+            </p>
+            <div className="mb-2 h-1 w-44 overflow-hidden rounded-full bg-sandstone-deep/70">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-gold to-[#2f7d4f] transition-[width] duration-700"
+                style={{ width: `${placed.length ? (doneCount / placed.length) * 100 : 0}%` }}
+              />
+            </div>
+            <p className="flex items-center gap-2 text-ink-soft">
+              <span className="tm-legend-dot tm-legend-dot--done">
+                <Check className="h-2.5 w-2.5" strokeWidth={3.5} aria-hidden />
+              </span>
+              {t.progress.legendDone}
+            </p>
+            <p className="mt-1 flex items-center gap-2 text-ink-soft">
+              <span className="tm-legend-dot" />
+              {t.progress.legendPending}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={fitAll}
+          title="Fit"
+          aria-label="Fit all temples"
+          className="absolute right-3 top-3 z-[500] rounded-md border border-sandstone-deep bg-ivory/95 p-2 text-ink-soft shadow-md transition-colors hover:text-maroon"
+        >
+          <Maximize2 className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
 
       {nearby && nearby.length > 0 && (
         <div className="mt-6">
@@ -200,11 +338,18 @@ export function TempleMap({ points, lang }: { points: TirthaMapPoint[]; lang: La
               return (
                 <li
                   key={p.id}
-                  className="flex items-center justify-between gap-3 rounded-sm border border-sandstone-deep bg-ivory px-4 py-3"
+                  className={`flex items-center justify-between gap-3 rounded-md border bg-ivory px-4 py-3 transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                    completed.has(p.slug) ? "border-[#2f7d4f]/50" : "border-sandstone-deep"
+                  }`}
                 >
                   <div className="min-w-0">
-                    <a href={detailHref} className="block truncate font-ui text-sm font-medium text-maroon hover:underline">
-                      {p.title}
+                    <a href={detailHref} className="flex items-center gap-1.5 truncate font-ui text-sm font-medium text-maroon hover:underline">
+                      {completed.has(p.slug) && (
+                        <span className="tm-legend-dot tm-legend-dot--done shrink-0" title={t.progress.legendDone}>
+                          <Check className="h-2.5 w-2.5" strokeWidth={3.5} aria-hidden />
+                        </span>
+                      )}
+                      <span className="truncate">{p.title}</span>
                     </a>
                     <p className="truncate font-ui text-xs text-ink-soft">
                       {place ? `${place} · ` : ""}

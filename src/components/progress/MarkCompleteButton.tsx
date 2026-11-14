@@ -9,13 +9,15 @@ import { getUiStrings } from "@/lib/i18n/dictionary";
 
 type Props = {
   slug: string;
+  /** Tirtha name, shown in the confirmation toast. */
+  title?: string;
   lang: LanguageCode;
   /** All slugs in entry order, used for the "x of y" count and next suggestion. */
   allSlugs: string[];
   variant?: "inline" | "panel";
 };
 
-export function MarkCompleteButton({ slug, lang, allSlugs, variant = "inline" }: Props) {
+export function MarkCompleteButton({ slug, title, lang, allSlugs, variant = "inline" }: Props) {
   const t = getUiStrings(lang).progress;
   const { completed, toggle, hydrated } = useCompleted();
   const [justMarked, setJustMarked] = useState(false);
@@ -23,7 +25,7 @@ export function MarkCompleteButton({ slug, lang, allSlugs, variant = "inline" }:
 
   const onClick = () => {
     setJustMarked(!isDone);
-    toggle(slug);
+    toggle(slug, title);
   };
 
   if (variant === "inline") {

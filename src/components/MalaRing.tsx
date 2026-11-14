@@ -55,8 +55,9 @@ export function MalaRing({
       />
       {beads.map((n) => {
         const angle = (n / total) * Math.PI * 2 - Math.PI / 2;
-        const cx = r + beadOrbit * Math.cos(angle);
-        const cy = r + beadOrbit * Math.sin(angle);
+        // Rounded so server- and client-rendered SVG attributes match exactly.
+        const cx = Math.round((r + beadOrbit * Math.cos(angle)) * 100) / 100;
+        const cy = Math.round((r + beadOrbit * Math.sin(angle)) * 100) / 100;
         const isCurrent = n === current;
         const s = orderSlugs?.[n - 1];
         const isDone = !!s && completed.has(s);

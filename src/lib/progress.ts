@@ -111,6 +111,31 @@ function subscribe(cb: () => void) {
   };
 }
 
+export const TOAST_EVENT = "parsh108:toast";
+export type ToastDetail = { done: boolean; title?: string };
+
+/**
+ * Toggle one tirtha. Usable outside React too (the Leaflet map popups are
+ * plain DOM). Updates the local cache immediately, then persists to Supabase.
+ */
+export function toggleCompleted(slug: string, title?: string): boolean {
+  const next = new Set(read());
+  const done = !next.has(slug);
+  if (done) next.add(slug);
+  else next.delete(slug);
+  write(next); // optimistic local update
+  pushChange(slug, done).catch(() => {});
+  window.dispatchEvent(new CustomEvent<ToastDetail>(TOAST_EVENT, { detail: { done, title } }));
+  return done;
+}
+
+/** Non-React read of the current completed set (local cache). */
+export function getCompleted(): ReadonlySet<string> {
+  return read();
+}
+
+export { subscribe as subscribeCompleted };
+
 export function useCompleted() {
   const completed = useSyncExternalStore(subscribe, read, () => EMPTY);
   // Server snapshot is EMPTY; this flag lets callers avoid flashing "0 done"
@@ -121,14 +146,7 @@ export function useCompleted() {
     () => false,
   );
 
-  const toggle = useCallback((slug: string) => {
-    const next = new Set(read());
-    const done = !next.has(slug);
-    if (done) next.add(slug);
-    else next.delete(slug);
-    write(next); // optimistic local update
-    pushChange(slug, done).catch(() => {});
-  }, []);
+  const toggle = useCallback((slug: string, title?: string) => toggleCompleted(slug, title), []);
 
   return { completed, toggle, hydrated };
 }

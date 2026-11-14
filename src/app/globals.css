@@ -219,3 +219,174 @@ main {
 html {
   scrollbar-color: var(--color-sandstone-deep) transparent;
 }
+
+/* ---- Temple map pins & popups ---- */
+.tm-pin {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: radial-gradient(circle at 35% 30%, #b0384b, #7a1a2b 70%);
+  border: 2px solid #f3d9a4;
+  box-shadow: 0 3px 8px rgba(42, 31, 26, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 180ms ease;
+}
+.tm-pin span {
+  transform: rotate(45deg);
+  font: 600 10px/1 var(--font-ui), system-ui, sans-serif;
+  color: #fff7e6;
+}
+.tm-pin--done {
+  background: radial-gradient(circle at 35% 30%, #4fae74, #2f7d4f 70%);
+  border-color: #e8f6ec;
+}
+.tm-pin--done span {
+  font-size: 14px;
+}
+.leaflet-marker-icon:hover .tm-pin {
+  transform: rotate(-45deg) scale(1.15);
+}
+.tm-legend-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #7a1a2b;
+  color: #fff;
+  border: 1.5px solid #f3d9a4;
+}
+.tm-legend-dot--done {
+  background: #2f7d4f;
+  border-color: #e8f6ec;
+}
+.tm-popup .leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  box-shadow: 0 12px 28px -10px rgba(42, 31, 26, 0.5);
+}
+.tm-popup .leaflet-popup-tip {
+  background: var(--color-ivory);
+}
+.tm-popup-body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+.tm-popup-num {
+  font: 500 10px/1.4 var(--font-ui), system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+.tm-popup-done {
+  color: #2f7d4f;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.tm-popup-title {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--color-maroon) !important;
+  text-decoration: none;
+}
+.tm-popup-title:hover {
+  text-decoration: underline;
+}
+.tm-popup-place {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+.tm-popup-actions {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.tm-popup-toggle {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font: 500 12px/1 var(--font-ui), system-ui, sans-serif;
+  background: #2f7d4f;
+  color: #fff;
+  border: 1px solid #2f7d4f;
+  transition: filter 150ms ease;
+}
+.tm-popup-toggle:hover {
+  filter: brightness(1.1);
+}
+.tm-popup-toggle.is-done {
+  background: transparent;
+  color: var(--color-ink-soft);
+  border-color: var(--color-sandstone-deep);
+}
+.tm-popup-link {
+  font: 500 12px/1 var(--font-ui), system-ui, sans-serif;
+  color: var(--color-maroon) !important;
+}
+
+/* ---- Interactive polish ---- */
+.nav-link--active::after {
+  transform: scaleX(1);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.toast-in {
+  animation: toast-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.lightbox-in {
+  animation: lightbox-in 200ms ease-out both;
+}
+
+/* Cards rise in as they scroll into view (progressive enhancement). */
+@supports (animation-timeline: view()) {
+  @keyframes card-rise {
+    from {
+      opacity: 0;
+      scale: 0.94;
+    }
+    to {
+      opacity: 1;
+      scale: 1;
+    }
+  }
+  .tirtha-card {
+    animation: card-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+/* Tactile press feedback on buttons. */
+button:not(:disabled):active,
+a.rounded-sm:active {
+  transform: translateY(1px) scale(0.985);
+}

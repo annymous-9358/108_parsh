@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { NavLinks } from "@/components/ui/NavLinks";
 import type { LanguageCode } from "@/lib/i18n/languages";
 import { getUiStrings } from "@/lib/i18n/dictionary";
 
@@ -17,15 +18,13 @@ export function Header({ lang }: { lang: LanguageCode }) {
           </span>
         </Link>
         <nav className="font-ui flex items-center gap-3 text-xs sm:gap-5 sm:text-sm text-ink">
-          <Link href={`/${lang}/tirthas`} className="nav-link hover:text-maroon transition-colors">
-            {t.navList}
-          </Link>
-          <Link href={`/${lang}/about`} className="nav-link hover:text-maroon transition-colors">
-            {t.navHistory}
-          </Link>
-          <Link href={`/${lang}/map`} className="nav-link hover:text-maroon transition-colors">
-            {t.navMap}
-          </Link>
+          <NavLinks
+            items={[
+              { href: `/${lang}/tirthas`, label: t.navList },
+              { href: `/${lang}/about`, label: t.navHistory },
+              { href: `/${lang}/map`, label: t.navMap },
+            ]}
+          />
           <Link
             href="/admin"
             className="text-ink-soft hover:text-maroon transition-colors text-[11px] uppercase tracking-wide"

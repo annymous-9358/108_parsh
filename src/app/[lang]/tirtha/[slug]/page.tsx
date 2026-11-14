@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -25,6 +24,8 @@ import { SpeakButton } from "@/components/SpeakButton";
 import { BeadDivider } from "@/components/BeadDivider";
 import { TirthaSection } from "@/components/TirthaSection";
 import { MarkCompleteButton } from "@/components/progress/MarkCompleteButton";
+import { PhotoGallery } from "@/components/ui/PhotoGallery";
+import { ReadingProgress } from "@/components/ui/ReadingProgress";
 import { getAllTirthas, getTirtha, getTirthaImages } from "@/lib/data";
 import { tirthaImageUrl } from "@/lib/image-url";
 import { isLanguageCode, DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/i18n/languages";
@@ -94,6 +95,7 @@ export default async function TirthaDetailPage({
     <>
       <Header lang={lang} />
       <HistoryRecorder tirthaId={tirtha.id} />
+      <ReadingProgress />
       <main className="flex-1">
         <div className="mx-auto max-w-4xl px-5 py-10">
           <div className="mb-3 flex items-start justify-between gap-6">
@@ -127,7 +129,7 @@ export default async function TirthaDetailPage({
           )}
 
           <div className="mb-8 flex flex-wrap items-center gap-3">
-            <MarkCompleteButton slug={tirtha.slug} lang={lang} allSlugs={allSlugs} />
+            <MarkCompleteButton slug={tirtha.slug} title={tirtha.title} lang={lang} allSlugs={allSlugs} />
             {tirtha.maps_url && (
               <a
                 href={tirtha.maps_url}
@@ -163,26 +165,14 @@ export default async function TirthaDetailPage({
             </p>
           )}
 
-          {images.length > 0 && (
-            <div className="mb-10 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {images.slice(0, 12).map((im, i) => (
-                <div
-                  key={im.id}
-                  className={`relative overflow-hidden rounded-sm bg-sandstone-deep/30 ${
-                    i === 0 ? "col-span-2 aspect-[4/3] sm:col-span-2" : "aspect-square"
-                  }`}
-                >
-                  <Image
-                    src={tirthaImageUrl(im.storage_path)}
-                    alt={`${tirtha.title} फोटो ${i + 1}`}
-                    fill
-                    sizes="(min-width: 640px) 33vw, 50vw"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+          <PhotoGallery
+            photos={images.slice(0, 12).map((im, i) => ({
+              id: im.id,
+              src: tirthaImageUrl(im.storage_path),
+              alt: `${tirtha.title} फोटो ${i + 1}`,
+            }))}
+            lang={lang}
+          />
 
           {hasStructuredContent ? (
             <div className="flex flex-col gap-4">
@@ -220,6 +210,7 @@ export default async function TirthaDetailPage({
 
           <MarkCompleteButton
             slug={tirtha.slug}
+            title={tirtha.title}
             lang={lang}
             allSlugs={allSlugs}
             variant="panel"
